@@ -8,7 +8,7 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 /**
- * Used by Jakarta Bean Validation to validate $TYPE$s annotated with \@{@link MyConstraint}.
+ * Used by Jakarta Bean Validation to validate Strings annotated with \@{@link MyConstraint}.
  * TODO: Verifies...
  */
 public class MyConstraintValidator implements ConstraintValidator<MyConstraint, String> {
@@ -33,12 +33,12 @@ public class MyConstraintValidator implements ConstraintValidator<MyConstraint, 
     public boolean isValid(@Nullable String stringToValidate, ConstraintValidatorContext context) {
 
         if (stringToValidate == null) {
-            return Validations.violation(context, "Must not be null.");
+            return Validations.invalid(context, "Must not be null.");
         }
 
         // Just an example — String must be all lowercase:
         if (!stringToValidate.equals(stringToValidate.toLowerCase())) {
-            return Validations.violation(context, "Must be lowercase.");
+            return Validations.invalid(context, "Must be lowercase.");
         }
 
         return true;

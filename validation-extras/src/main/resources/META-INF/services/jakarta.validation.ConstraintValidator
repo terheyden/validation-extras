@@ -1,0 +1,3 @@
+# Just add your dynamic validators in here.
+# The association to the right annotation will happen automatically.
+com.terheyden.valid.examples.ProgramConstraintValidator

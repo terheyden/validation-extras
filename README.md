@@ -1,18 +1,24 @@
-# validation-extras — Helper classes for working with Jakarta Bean Validation
+# validation-extras
+Helper classes for working with Jakarta Bean Validation.
 
 - [What is this?](#what-is-this-)
-    * [Features](#features)
+    * [Java validation in a nutshell](#java-validation-in-a-nutshell)
+    * [What can be validated?](#what-can-be-validated-)
+    * [`validation-extras` features](#-validation-extras--features)
 - [Maven](#maven)
     * [For normal (non-Spring) projects](#for-normal--non-spring--projects)
     * [For Spring-based projects](#for-spring-based-projects)
-- [Normal (Non-Spring) Usage](#normal--non-spring--usage)
-    * [Validating fields or properties](#validating-fields-or-properties)
-    * [Validating method parameters](#validating-method-parameters)
-    * [Validating constructor parameters](#validating-constructor-parameters)
-- [Usage From Spring](#usage-from-spring)
-    * [Validating fields or properties](#validating-fields-or-properties-1)
-    * [Validating method parameters](#validating-method-parameters-1)
-    * [Validating constructor parameters](#validating-constructor-parameters-1)
+- [How to use](#how-to-use)
+    * [Normal (Non-Spring) usage](#normal--non-spring--usage)
+        + [Validating fields or properties](#validating-fields-or-properties)
+        + [Validating method parameters](#validating-method-parameters)
+        + [Validating constructor parameters](#validating-constructor-parameters)
+    * [Usage From Spring](#usage-from-spring)
+        + [Validating fields or properties](#validating-fields-or-properties-1)
+        + [Validating method parameters](#validating-method-parameters-1)
+        + [Validating constructor parameters](#validating-constructor-parameters-1)
+- [Validation cookbook](#validation-cookbook)
+    + [How to assign a constraint validator programmatically](#how-to-assign-a-constraint-validator-programmatically)
 - [Performance considerations](#performance-considerations)
 
 # What is this?
@@ -190,13 +196,71 @@ TODO: Validations.findConstructorValidator(clazz)
 
 ## Usage From Spring
 
-Note that validating static fields or parameters is not supported.
+If you're using Spring Boot, you'll need to add validation support:
 
-### Validating fields or properties
+```xml
+<!-- Add Jakarta Bean Validation -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+```
 
-### Validating method parameters
+Spring takes care of validating objects and method parameters for any Spring-aware classes.
+* DTO-like classes with data have validation annotations as usual
+* Service-like classes that expect valid data have a `@Validated` annotation
+* `@Valid` on a parameter tells the validator to _recurse_ into that object
 
-### Validating constructor parameters
+For example:
+
+```java
+@Validated
+@RestController
+public class MyController {
+
+    @GetMapping
+    public String greet(@NotBlank String greeting, @Valid @NotNull Employee employee) {
+        return "%s, %s!".formatted(greeting, employee.getName());
+    }
+}
+```
+
+
+# Validation cookbook
+
+### How to assign a constraint validator programmatically
+
+Decorating your classes with something like `@NotNull` makes sense in a 'lib' or 'dto' layer.
+However, validators might make more sense in a logic or 'service' layer.
+So how do we decouple the two?
+
+1. Create your constraint but leave the validator _empty_
+   1. `@Constraint(validatedBy = { })`
+2. Create a validator for your constraint as usual
+3. Create the constraint metadata file
+   1. (Normal projects) `src/main/resources/META-INF/services/jakarta.validation.ConstraintValidator`
+   2. (Spring projects) `src/main/resources/META-INF/services/javax.validation.ConstraintValidator`
+4. Add an entry to the metadata file for each dynamic validator you create
+
+_Example `src/main/resources/META-INF/services/jakarta.validation.ConstraintValidator` file:_
+```
+# Just add your dynamic validators in here.
+# The association to the right annotation will happen automatically.
+com.terheyden.validation.constraints.NotNullValidator
+```
+
+Check out the [implementation docs](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-constraint-definition-contribution)
+for more information.
+
+### Easy copy-and-paste
+```shell
+# Normal project:
+mkdir -pv src/main/resources/META-INF/services && touch src/main/resources/META-INF/services/jakarta.validation.ConstraintValidator
+# Spring project:
+mkdir -pv src/main/resources/META-INF/services && touch src/main/resources/META-INF/services/javax.validation.ConstraintValidator
+```
+
+Now, in your IDE, just search for the file and add to it.
 
 # Performance considerations
 

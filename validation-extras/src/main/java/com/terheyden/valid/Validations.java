@@ -250,13 +250,12 @@ public final class Validations {
     // UTILS — other helper methods
 
     /**
-     * Nice little helper method for setting a custom constraint violation message and returning {@code false}
-     * if the constraint is violated. Call this inside your {@code MyConstraintValidator.isValid()} method.
+     * Call this inside your {@code MyConstraintValidator.isValid()} method when a constraint is violated.
+     * Sets a custom constraint violation message and returns {@code false}.
      */
-    public static boolean violation(ConstraintValidatorContext context, String errorMessage, Object... args) {
+    public static boolean invalid(ConstraintValidatorContext context, String errorMessage, Object... args) {
 
         context.disableDefaultConstraintViolation();
-
         String formattedError = args.length == 0 ? errorMessage : errorMessage.formatted(args);
 
         context
