@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>validation-extras-parent</artifactId>
+        <groupId>com.terheyden</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>validation-extras</artifactId>
+    <name>validation-extras</name>
+    <description>Jakarta Bean Validation extras</description>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Converged: hibernate-validator->jboss-logging->1.7.25, logback-classic->1.7.32 -->
+            <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.32</version>
+            </dependency>
+            <!-- Converged: hibernate-validator->jboss-logging-processor->3.4.0.Final, hibernate-validator->jboss-logging-annotations->3.4.0.Final, hibernate-validator->3.4.1.Final -->
+            <!-- https://mvnrepository.com/artifact/org.jboss.logging/jboss-logging -->
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging</artifactId>
+                <version>3.4.1.Final</version>
+            </dependency>
+            <!-- Converged: hibernate-validator->4.0.1, (here or parent)->4.0.2 -->
+            <!-- https://mvnrepository.com/artifact/org.glassfish/jakarta.el -->
+            <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>jakarta.el</artifactId>
+                <version>4.0.2</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- These next two dependencies are for Jakarta Bean Validation support.
+             The Hibernate team provides the reference implementation -->
+        <!-- This transitively pulls in the dependency to the Jakarta Bean Validation API
+             (jakarta.validation:jakarta.validation-api:3.0.0)
+             https://mvnrepository.com/artifact/org.hibernate.validator/hibernate-validator -->
+        <dependency>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>7.0.4.Final</version>
+        </dependency>
+        <!-- Hibernate Validator requires an implementation of Jakarta Expression Language
+             for evaluating dynamic expressions in constraint violation messages,
+             even if we're not actually using it (I checked) -->
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.el</artifactId>
+        </dependency>
+        <!-- @ParametersAreNonnullByDefault, @Nonnull, @Nullable -->
+        <!-- https://mvnrepository.com/artifact/com.github.spotbugs/spotbugs-annotations -->
+        <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+        </dependency>
+        <!-- SLF4J via Logback -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+        </dependency>
+
+        <!-- Test dependencies -->
+
+        <!-- JUnit 5 -->
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- JUnit 5 engine for running tests during maven build -->
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- Mockito mocks -->
+        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+</project>

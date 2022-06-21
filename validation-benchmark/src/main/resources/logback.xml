@@ -1,0 +1,17 @@
+<configuration debug="false">
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- Encoders are ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
+        <encoder>
+            <!-- https://logback.qos.ch/manual/layouts.html -->
+            <pattern>%date{HH:mm:ss.SSS} [%-20.20thread] %-5level %-30logger{0} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <logger name="com.terheyden" value="com.terheyden" level="DEBUG"/>
+
+</configuration>
