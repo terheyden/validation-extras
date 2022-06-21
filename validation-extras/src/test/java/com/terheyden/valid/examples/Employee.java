@@ -1,25 +1,24 @@
-package com.terheyden.valid;
+package com.terheyden.valid.examples;
 
 import java.util.UUID;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import com.terheyden.valid.ConstructorValidator;
+import com.terheyden.valid.Validations;
+
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 /**
- * Employee class.
+ * An example of how to use Jakarta Bean Validation and the validation-extras library.
  */
 public class Employee {
 
     /**
-     * Validator for our constructor with 2 params.
-     */
-    private static final ConstructorValidator EMPLOYEE2 = Validations.createConstructorValidator(Employee.class, 2);
-
-    /**
      * Validator for our constructor with 3 params.
+     * 'EMPLOYEE' or 'EMPLOYEE3' are good constructor validator names.
      */
-    private static final ConstructorValidator EMPLOYEE3 = Validations.createConstructorValidator(Employee.class, 3);
+    private static final ConstructorValidator EMPLOYEE = Validations.createConstructorValidator(Employee.class, 3);
 
     @NotNull
     private final UUID userId;
@@ -32,18 +31,14 @@ public class Employee {
 
     public Employee(@NotNull UUID userId, @NotBlank String name, @Min(1) int age) {
 
-        EMPLOYEE3.validate(userId, name, age);
+        EMPLOYEE.validateParams(userId, name, age);
         this.userId = userId;
         this.name = name;
         this.age = age;
     }
 
     public Employee(@NotBlank String name, @Min(1) int age) {
-
-        EMPLOYEE2.validate(name, age);
-        this.userId = UUID.randomUUID();
-        this.name = name;
-        this.age = age;
+        this(UUID.randomUUID(), name, age);
     }
 
     public UUID getUserId() {

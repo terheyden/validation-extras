@@ -1,6 +1,26 @@
 # validation-extras — Helper classes for working with Jakarta Bean Validation
 
+- [What is this?](#what-is-this-)
+    * [Features](#features)
+- [Maven](#maven)
+    * [For normal (non-Spring) projects](#for-normal--non-spring--projects)
+    * [For Spring-based projects](#for-spring-based-projects)
+- [Normal (Non-Spring) Usage](#normal--non-spring--usage)
+    * [Validating fields or properties](#validating-fields-or-properties)
+    * [Validating method parameters](#validating-method-parameters)
+    * [Validating constructor parameters](#validating-constructor-parameters)
+- [Usage From Spring](#usage-from-spring)
+    * [Validating fields or properties](#validating-fields-or-properties-1)
+    * [Validating method parameters](#validating-method-parameters-1)
+    * [Validating constructor parameters](#validating-constructor-parameters-1)
+- [Performance considerations](#performance-considerations)
+
 # What is this?
+
+The `validation-extras` library makes it easier to work with Jakarta Bean Validation,
+most notably when you want to use it outside of the Spring framework.
+
+## Java validation in a nutshell
 
 Jakarta Bean Validation is a framework for validating fields and objects _declaratively_.
 For example:
@@ -9,6 +29,7 @@ For example:
 // Example without Validation:
 public void saveEmployee(Employee employee) {
 
+    // Guard clauses:
     if (employee == null) {
         throw new IllegalArgumentException("Employee cannot be null.");
     }
@@ -26,7 +47,8 @@ public void saveEmployee(Employee employee) {
 }
 ```
 
-It's cleaner to separate the validation logic from the business logic:
+It's cleaner to separate the validation logic from the business logic,
+and the Jakarta Bean Validation framework allows us to do this:
 
 ```java
 // Same example with Validation:
@@ -38,12 +60,54 @@ public void saveEmployee(Employee employee) {
 }
 ```
 
-This library makes it easier to work with Jakarta Bean Validation,
-most notably when you want to use it outside of the Spring framework.
+Where exactly did all those guard clauses go?
+They turned into constraints inside the `Employee` class, for example:
+
+```java
+public class Employee {
+    @NotBlank
+    private String name;
+    // ...
+}
+```
+
+Then when `Validations.validate(employee)` is called, those constraints are checked.
+
+## What can be validated?
+
+Things you can validate:
+* Object fields or properties
+* Method parameters
+* Constructor parameters
+
+Things you cannot validate:
+* Static fields or parameters
+    * This is a limitation the Jakarta Bean Validation API
+
+## `validation-extras` features
+
+Everything in this library starts with the `Validations` class.
+That keeps it easy to remember.
+
+```
+Validations.check(obj)                      — validates an object and returns violations
+Validations.validate(obj)                   — validates an object and throws if there are violations
+Validations.createMethodValidator(...)      — creates a validator for a method (more info below)
+Validations.createConstructorValidator(...) — creates validator for a class constructor
+Validations.violation(...)                  — used in custom constraints: helps creates violation messages
+``````
+
+Those are the basics. More details and examples are down below.
 
 # Maven
 
-### For normal (non-Spring) projects
+This project provides two dependencies, one for Spring projects,
+and one for "normal" non-Spring projects.
+You only need to add one of them to your project.
+
+## For normal (non-Spring) projects
+
+Uses the latest `3.0.x` Bean Validation API.
 ```xml
 <dependency>
     <groupId>com.terheyden</groupId>
@@ -52,9 +116,10 @@ most notably when you want to use it outside of the Spring framework.
 </dependency>
 ``````
 
-### For Spring-based projects
+## For Spring-based projects
 
-As of 2022, Spring still integrates with the older `javax` validation namespace.
+Spring's validation support (as of 2022) still uses the `2.0.x` version of the Bean Validation API.
+This version of `validation-extras` is compiled with those older Spring-compatible libraries.
 ```xml
 <dependency>
     <groupId>com.terheyden</groupId>
@@ -63,11 +128,13 @@ As of 2022, Spring still integrates with the older `javax` validation namespace.
 </dependency>
 ```
 
-# Normal (Non-Spring) Usage
+# How to use
 
-Note that validating static fields or parameters is not supported.
+Spring and non-Spring usage is very different, because Spring provides a lot of validation support.
 
-## Validating fields or properties
+## Normal (Non-Spring) usage
+
+### Validating fields or properties
 
 1. Annotate your fields or getter properties (either is fine):
 
@@ -95,7 +162,7 @@ private void doSomeWork(Employee employee){
 }
 ```
 
-## Validating method parameters
+### Validating method parameters
 
 1. Create a static `MethodValidator` for each method that uses validating
 2. Call `XXX.validate(this, param1, param2, ...)` at the beginning of each method:
@@ -117,19 +184,19 @@ class MyClass {
 }
 ```
 
-## Validating constructor parameters
+### Validating constructor parameters
 
 TODO: Validations.findConstructorValidator(clazz)
 
-# Usage From Spring
+## Usage From Spring
 
 Note that validating static fields or parameters is not supported.
 
-## Validating fields or properties
+### Validating fields or properties
 
-## Validating method parameters
+### Validating method parameters
 
-## Validating constructor parameters
+### Validating constructor parameters
 
 # Performance considerations
 

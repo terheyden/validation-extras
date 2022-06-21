@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 
-import com.terheyden.valid.Employee;
 import com.terheyden.valid.MethodValidator;
 import com.terheyden.valid.Validations;
 
@@ -33,19 +32,19 @@ public class EmployeeData2 {
 
     public void saveEmployee(@NotNull @Valid Employee employee) {
 
-        SAVE.validate(this, employee);
+        SAVE.validateParams(this, employee);
         LOG.info("Saving employee: {}", employee);
     }
 
     public Employee loadEmployee(@NotNull UUID userId) {
 
-        LOAD_UUID.validate(this, userId);
+        LOAD_UUID.validateParams(this, userId);
         return new Employee(userId, "Cora", 12);
     }
 
     public Employee loadEmployee(@NotBlank String userId) {
 
-        LOAD_STRING.validate(this, userId);
+        LOAD_STRING.validateParams(this, userId);
         return new Employee(UUID.fromString(userId), "Cora", 12);
     }
 }

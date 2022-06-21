@@ -12,6 +12,32 @@
     <name>validation-benchmark</name>
     <description>Benchmarking for validation-extras</description>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- Converged: validation-extras->hibernate-validator->1.7.25, logback-classic->1.7.32 -->
+            <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.32</version>
+            </dependency>
+            <!-- Converged: validation-extras->hibernate-validator->3.4.0.Final, validation-extras->hibernate-validator->3.4.1.Final -->
+            <!-- https://mvnrepository.com/artifact/org.jboss.logging/jboss-logging -->
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging</artifactId>
+                <version>3.4.1.Final</version>
+            </dependency>
+            <!-- Converged: validation-extras->4.0.2, validation-extras->hibernate-validator->4.0.1 -->
+            <!-- https://mvnrepository.com/artifact/org.glassfish/jakarta.el -->
+            <dependency>
+                <groupId>org.glassfish</groupId>
+                <artifactId>jakarta.el</artifactId>
+                <version>4.0.2</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

@@ -2,8 +2,7 @@ package com.terheyden.valid;
 
 import org.junit.jupiter.api.Test;
 
-import static com.terheyden.valid.ValidationAssertions.assertInvalid;
-import static com.terheyden.valid.ValidationAssertions.assertValid;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * ValidationsTest unit tests.
@@ -11,19 +10,28 @@ import static com.terheyden.valid.ValidationAssertions.assertValid;
 public class ValidationsTest {
 
     @Test
-    public void test() {
+    public void testCheck() {
 
-        Employee cora = new Employee("Cora", 12);
-        Employee badAge = new Employee("Fluffy", -1);
-        Employee badName = new Employee(null, 30);
-        Employee nullPerson = null;
+        User good = new User("Cora", 10);
 
-        // Good employees should pass.
-        assertValid(cora);
+        assertThrows(IllegalArgumentException.class, () -> Validations.check(null));
+        Validations.check(good);
 
-        // Bad employees should fail.
-        assertInvalid(badAge);
-        assertInvalid(badName);
-        assertInvalid(nullPerson);
+        assertThrows(IllegalArgumentException.class, () -> Validations.validate(null));
+        Validations.validate(good);
+
+    }
+
+    /**
+     * Trivial user class for testing.
+     */
+    private static class User {
+        private final String name;
+        private final int age;
+
+        private User(String name, int age) {
+            this.name = name;
+            this.age = age;
+        }
     }
 }

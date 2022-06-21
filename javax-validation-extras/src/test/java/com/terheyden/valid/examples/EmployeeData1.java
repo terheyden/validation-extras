@@ -4,8 +4,6 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 
-import com.terheyden.valid.Employee;
-
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**

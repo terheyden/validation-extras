@@ -3,14 +3,14 @@ package com.terheyden.valid;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
-import jakarta.validation.ValidationException;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import jakarta.validation.executable.ExecutableValidator;
@@ -36,30 +36,27 @@ public final class Validations {
         // Private since this class shouldn't be instantiated.
     }
 
+    ////////////////////////////////////////
+    // VALIDATION — checking and validating
+
     /**
      * Perform Jakarta Bean Validation on the given object, returning any error strings.
      *
-     * @return a list of constraint violations, or an empty list if no violations were found
+     * @return a set of constraint violations, or an empty set if no violations were found.
+     *     Use {@link Validations#parseViolationMessages(Collection)} if you prefer easy-to-read string results
      */
-    public static List<String> check(Object objectToValidate) {
-        return VALIDATOR.validate(objectToValidate)
-            .stream()
-            .map(ValidationUtils::createViolationString)
-            .toList();
+    public static Set<? extends ConstraintViolation<?>> check(@Nullable Object objectToValidate) {
+        return VALIDATOR.validate(objectToValidate);
     }
 
     /**
      * Perform Jakarta Bean Validation on the given object, throwing an exception if any violations are found.
      *
      * @param objectToValidate the object to validate; may not be null
-     * @throws ValidationException if the object to validate is null
+     * @throws IllegalArgumentException if the object to validate is null
      * @throws ConstraintViolationException if any violations are found
      */
     public static void validate(@Nullable Object objectToValidate) {
-
-        if (objectToValidate == null) {
-            throw new ValidationException("Object to validate cannot be null.");
-        }
 
         Set<ConstraintViolation<Object>> violations = VALIDATOR.validate(objectToValidate);
 
@@ -71,21 +68,90 @@ public final class Validations {
     }
 
     /**
-     * Nice little helper method for setting a custom constraint violation message and returning {@code false}
-     * if the constraint is violated. Call this inside your {@code MyConstraintValidator.isValid()} method.
+     * Performs Jakarta Bean Validation on the method's parameters, returning any errors.
+     * Due to the way Jakarta Bean Validation works, ALL method params must be passed in.
+     * Package-private — the user will invoke this via {@link MethodValidator#validateParams(Object, Object...)}.
+     *
+     * @param thisMethodObject the object instance containing the method to validate, i.e. 'this'
+     * @param methodToValidate the method to validate, created via {@link #createMethodValidator(Class, String)}
+     * @param allMethodParams  all the parameters coming into the method
+     * @return a list of constraint violations, or an empty list if no violations were found
      */
-    public static boolean violation(ConstraintValidatorContext context, String errorMessage, Object... args) {
+    /* package */ static Set<? extends ConstraintViolation<?>> checkParams(
+        Object thisMethodObject,
+        Method methodToValidate,
+        Object... allMethodParams) {
 
-        context.disableDefaultConstraintViolation();
-
-        String formattedError = args.length == 0 ? errorMessage : errorMessage.formatted(args);
-
-        context
-            .buildConstraintViolationWithTemplate(formattedError)
-            .addConstraintViolation();
-
-        return false;
+        return METHOD_VALIDATOR.validateParameters(thisMethodObject, methodToValidate, allMethodParams);
     }
+
+    /**
+     * Perform Jakarta Bean Validation on a method's params, throwing an exception if any violations are found.
+     * Package-private — the user will invoke this via {@link MethodValidator#validateParams(Object, Object...)}.
+     *
+     * @param thisMethodObject object instance where the method lives, i.e. 'this'
+     * @param methodToValidate the method whose params we are validating
+     * @param methodParams     the params to validate
+     * @throws IllegalArgumentException if the object to validate is null
+     * @throws ConstraintViolationException if any violations are found
+     */
+    /* package */ static void validateParams(
+        Object thisMethodObject,
+        Method methodToValidate,
+        Object... methodParams) {
+
+        Set<ConstraintViolation<Object>> violations = METHOD_VALIDATOR.validateParameters(
+            thisMethodObject,
+            methodToValidate,
+            methodParams);
+
+        if (violations.isEmpty()) {
+            return;
+        }
+
+        throw new ConstraintViolationException(createViolationString(violations), violations);
+    }
+
+    /**
+     * Performs Jakarta Bean Validation on the given constructor, returning any error strings.
+     * Package-private — the user will invoke this via {@link ConstructorValidator#validateParams(Object...)}.
+     *
+     * @param constructorToValidate the constructor to validate
+     * @param allConstructorParams  all the parameters coming into the constructor
+     * @return a list of constraint violations, or an empty list if no violations were found
+     */
+    /* package */ static Set<? extends ConstraintViolation<?>> checkParams(
+        Constructor<?> constructorToValidate,
+        Object... allConstructorParams) {
+
+        return METHOD_VALIDATOR.validateConstructorParameters(constructorToValidate, allConstructorParams);
+    }
+
+    /**
+     * Perform Jakarta Bean Validation on a constructor's params, throwing an exception if any violations are found.
+     * Package-private — the user will invoke this via {@link ConstructorValidator#validateParams(Object...)}.
+     *
+     * @param constructorToValidate the constructor whose params we are validating
+     * @param constructorParams     the params to validate
+     * @throws ConstraintViolationException if any violations are found
+     */
+    /* package */ static void validateParams(
+        Constructor<?> constructorToValidate,
+        Object... constructorParams) {
+
+        Set<ConstraintViolation<Object>> violations = METHOD_VALIDATOR.validateConstructorParameters(
+            constructorToValidate,
+            constructorParams);
+
+        if (violations.isEmpty()) {
+            return;
+        }
+
+        throw new ConstraintViolationException(createViolationString(violations), violations);
+    }
+
+    ////////////////////////////////////////
+    // METHOD / CONSTRUCTOR VALIDATORS — creation
 
     /**
      * Creates a reusable parameter validator for the given method. Locates the method by name,
@@ -180,91 +246,36 @@ public final class Validations {
         return new ConstructorValidator(classType, ConstructorValidations.findConstructor(classType, paramCount));
     }
 
-    /**
-     * Performs Jakarta Bean Validation on the given method, returning any error strings.
-     * Package-private — the user will invoke this via {@link MethodValidator#validate(Object, Object...)}.
-     *
-     * @param thisMethodObject the object instance containing the method to validate, i.e. 'this'
-     * @param methodToValidate the method to validate
-     * @param allMethodParams all the parameters coming into the method
-     * @return a list of constraint violations, or an empty list if no violations were found
-     */
-    /* package */ static List<String> checkParams(
-        Object thisMethodObject,
-        Method methodToValidate,
-        Object... allMethodParams) {
+    ////////////////////////////////////////
+    // UTILS — other helper methods
 
-        return METHOD_VALIDATOR.validateParameters(thisMethodObject, methodToValidate, allMethodParams)
-            .stream()
-            .map(ValidationUtils::createViolationString)
-            .toList();
+    /**
+     * Nice little helper method for setting a custom constraint violation message and returning {@code false}
+     * if the constraint is violated. Call this inside your {@code MyConstraintValidator.isValid()} method.
+     */
+    public static boolean violation(ConstraintValidatorContext context, String errorMessage, Object... args) {
+
+        context.disableDefaultConstraintViolation();
+
+        String formattedError = args.length == 0 ? errorMessage : errorMessage.formatted(args);
+
+        context
+            .buildConstraintViolationWithTemplate(formattedError)
+            .addConstraintViolation();
+
+        return false;
     }
 
     /**
-     * Perform Jakarta Bean Validation on a method's params, throwing an exception if any violations are found.
-     * Package-private — the user will invoke this via {@link MethodValidator#validate(Object, Object...)}.
-     *
-     * @param thisMethodObject object instance where the method lives, i.e. 'this'
-     * @param methodToValidate the method whose params we are validating
-     * @param methodParams     the params to validate
-     * @throws IllegalArgumentException if the object to validate is null
-     * @throws ConstraintViolationException if any violations are found
+     * Converts {@link ConstraintViolation}s into friendly error message strings.
+     * Useful after calling:
+     * <ul>
+     *     <li>{@link #check(Object)}</li>
+     *     <li>{@link MethodValidator#checkParams(Object, Object...)}</li>
+     *     <li>{@link ConstructorValidator#checkParams(Object...)}</li>
+     * </ul>
      */
-    /* package */ static void validateParams(
-        Object thisMethodObject,
-        Method methodToValidate,
-        Object... methodParams) {
-
-        Set<ConstraintViolation<Object>> violations = METHOD_VALIDATOR.validateParameters(
-            thisMethodObject,
-            methodToValidate,
-            methodParams);
-
-        if (violations.isEmpty()) {
-            return;
-        }
-
-        throw new ConstraintViolationException(createViolationString(violations), violations);
-    }
-
-    /**
-     * Performs Jakarta Bean Validation on the given constructor, returning any error strings.
-     * Package-private — the user will invoke this via {@link ConstructorValidator#validate(Object...)}.
-     *
-     * @param constructorToValidate the constructor to validate
-     * @param allConstructorParams all the parameters coming into the constructor
-     * @return a list of constraint violations, or an empty list if no violations were found
-     */
-    /* package */ static List<String> checkParams(
-        Constructor<?> constructorToValidate,
-        Object... allConstructorParams) {
-
-        return METHOD_VALIDATOR.validateConstructorParameters(constructorToValidate, allConstructorParams)
-            .stream()
-            .map(ValidationUtils::createViolationString)
-            .toList();
-    }
-
-    /**
-     * Perform Jakarta Bean Validation on a constructor's params, throwing an exception if any violations are found.
-     * Package-private — the user will invoke this via {@link ConstructorValidator#validate(Object...)}.
-     *
-     * @param constructorToValidate the constructor whose params we are validating
-     * @param constructorParams     the params to validate
-     * @throws ConstraintViolationException if any violations are found
-     */
-    /* package */ static void validateParams(
-        Constructor<?> constructorToValidate,
-        Object... constructorParams) {
-
-        Set<ConstraintViolation<Object>> violations = METHOD_VALIDATOR.validateConstructorParameters(
-            constructorToValidate,
-            constructorParams);
-
-        if (violations.isEmpty()) {
-            return;
-        }
-
-        throw new ConstraintViolationException(createViolationString(violations), violations);
+    public static Stream<String> parseViolationMessages(Collection<? extends ConstraintViolation<Object>> violations) {
+        return ValidationUtils.parseViolationMessages(violations);
     }
 }

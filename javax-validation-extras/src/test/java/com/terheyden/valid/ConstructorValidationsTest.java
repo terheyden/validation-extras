@@ -76,7 +76,7 @@ public class ConstructorValidationsTest {
         private final int age;
 
         public Animal1(@NotBlank String name, @Min(1) int age) {
-            ANIMAL1.validate(name, age);
+            ANIMAL1.validateParams(name, age);
             this.name = name;
             this.age = age;
         }
@@ -108,14 +108,14 @@ public class ConstructorValidationsTest {
         private final int age;
 
         public Animal2(@NotNull UUID animalId, @NotBlank String name, @Positive int age) {
-            ANIMAL3.validate(animalId, name, age);
+            ANIMAL3.validateParams(animalId, name, age);
             this.animalId = animalId;
             this.name = name;
             this.age = age;
         }
 
         public Animal2(@NotBlank String name, @Positive int age) {
-            ANIMAL2.validate(name, age);
+            ANIMAL2.validateParams(name, age);
             this.animalId = UUID.randomUUID();
             this.name = name;
             this.age = age;
