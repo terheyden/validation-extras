@@ -5,7 +5,7 @@
     <parent>
         <artifactId>validation-extras-parent</artifactId>
         <groupId>com.terheyden</groupId>
-        <version>0.0.1</version>
+        <version>0.0.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>validation-benchmark</artifactId>
