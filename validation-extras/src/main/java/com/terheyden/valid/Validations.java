@@ -277,4 +277,41 @@ public final class Validations {
     public static Stream<String> parseViolationMessages(Collection<? extends ConstraintViolation<Object>> violations) {
         return ValidationUtils.parseViolationMessages(violations);
     }
+
+    /**
+     * Helper method for creating strongly typed variables from an array of Objects.
+     * Useful when creating a method-level (cross-parameter) constraint.
+     * Validates that no elements are null, and casts them to the appropriate type.
+     *
+     * @param objParam an object from the {@code Object[]} array
+     * @return strongly-typed version of the parameter
+     * @param <T> expected strong type of the parameter
+     */
+    public static <T> T getObjectParam(Object objParam, Class<T> expectedType) {
+
+        if (objParam == null) {
+            throw new IllegalArgumentException("Null parameter.");
+        }
+
+        return expectedType.cast(objParam);
+    }
+
+    /**
+     * Helper method for creating strongly typed variables from an array of Objects.
+     * Useful when creating a method-level (cross-parameter) constraint.
+     * Validates that no elements are null, and casts them to the appropriate type.
+     *
+     * @param objParam an object from the {@code Object[]} array
+     * @return strongly-typed version of the parameter
+     * @param <T> expected strong type of the parameter
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T getObjectParam(Object objParam) {
+
+        if (objParam == null) {
+            throw new IllegalArgumentException("Null parameter.");
+        }
+
+        return (T) objParam;
+    }
 }

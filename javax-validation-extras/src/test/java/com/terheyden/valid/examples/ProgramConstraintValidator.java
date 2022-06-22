@@ -8,6 +8,10 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 /**
+ * To dynamically link this validator to {@link ProgramConstraint}, all that's needed is:
+ *     1. Create the file: META-INF/services/jakarta.validation.ConstraintValidator
+ *     2. Add the line: "com.terheyden.valid.examples.ProgramConstraintValidator"
+ * The assocation to the right annotation happens automatically.
  */
 public class ProgramConstraintValidator implements ConstraintValidator<MyConstraint, Object> {
 

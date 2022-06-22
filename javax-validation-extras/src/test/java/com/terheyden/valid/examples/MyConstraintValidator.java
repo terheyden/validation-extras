@@ -8,7 +8,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 /**
- * Used by Jakarta Bean Validation to validate Strings annotated with \@{@link MyConstraint}.
+ * Used by Jakarta Bean Validation to validate Strings annotated with @{@link MyConstraint}.
  * TODO: Verifies...
  */
 public class MyConstraintValidator implements ConstraintValidator<MyConstraint, String> {

@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 /**
  * An example of how to use Jakarta Bean Validation and the validation-extras library.
  */
+@ValidEmployee
 public class Employee {
 
     /**
