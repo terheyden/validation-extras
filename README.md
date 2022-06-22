@@ -308,16 +308,16 @@ fields or parameters at the same time.
 
 For class-level constraints, check out the [reference docs](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-class-level-constraints),
 and check out the working example included here:
-* [ValidEmployee.java](https://github.com/terheyden/validation-extras/blob/main/validation-extras/src/main/java/com/terheyden/valid/examples/ValidEmployee.java)
-* [ValidEmployeeValidator.java](https://github.com/terheyden/validation-extras/blob/main/validation-extras/src/main/java/com/terheyden/valid/examples/ValidEmployeeValidator.java)
+* [ValidEmployee.java](https://github.com/terheyden/validation-extras/blob/main/validation-extras/src/test/java/com/terheyden/valid/examples/ValidEmployee.java)
+* [ValidEmployeeValidator.java](https://github.com/terheyden/validation-extras/blob/main/validation-extras/src/test/java/com/terheyden/valid/examples/ValidEmployeeValidator.java)
 * [ValidEmployeeValidatorTest.java](https://github.com/terheyden/validation-extras/blob/main/validation-extras/src/test/java/com/terheyden/valid/examples/ValidEmployeeValidatorTest.java)
 
 ## How to create a method-level constraint
 
 To create a method-level constraint, check out the [reference docs](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-cross-parameter-constraints),
 and take a look at the working example in this repo:
-* [OffsetLessThanStringLength.java](https://github.com/terheyden/validation-extras/blob/main/validation-extras/src/main/java/com/terheyden/valid/examples/OffsetLessThanStringLength.java)
-* [OffsetLessThanStringLengthValidator.java](https://github.com/terheyden/validation-extras/blob/main/validation-extras/src/main/java/com/terheyden/valid/examples/OffsetLessThanStringLengthValidator.java)
+* [OffsetLessThanStringLength.java](https://github.com/terheyden/validation-extras/blob/main/validation-extras/src/test/java/com/terheyden/valid/examples/OffsetLessThanStringLength.java)
+* [OffsetLessThanStringLengthValidator.java](https://github.com/terheyden/validation-extras/blob/main/validation-extras/src/test/java/com/terheyden/valid/examples/OffsetLessThanStringLengthValidator.java)
 * [OffsetLessThanStringLengthValidatorTest.java](https://github.com/terheyden/validation-extras/blob/main/validation-extras/src/test/java/com/terheyden/valid/examples/OffsetLessThanStringLengthValidatorTest.java)
 
 # Performance considerations
