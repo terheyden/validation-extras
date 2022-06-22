@@ -117,7 +117,7 @@ Bean Validation API.
 <dependency>
     <groupId>com.terheyden</groupId>
     <artifactId>validation-extras</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
 </dependency>
 ``````
 
@@ -130,7 +130,7 @@ This version of `validation-extras` is compiled with those older Spring-compatib
 <dependency>
     <groupId>com.terheyden</groupId>
     <artifactId>javax-validation-extras</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
 </dependency>
 ```
 
