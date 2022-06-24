@@ -1,4 +1,0 @@
-# Just add your dynamic validators in here.
-# The association to the right annotation will happen automatically.
-# (Commented out for releases because it actually lives in the test dir.)
-# com.terheyden.valid.examples.ProgramConstraintValidator

@@ -34,6 +34,7 @@
     <dependencies>
         <!-- These next two dependencies are for Jakarta Bean Validation support.
              The Hibernate team provides the reference implementation -->
+        <!-- https://hibernate.org/validator/documentation/ -->
         <!-- This transitively pulls in the dependency to the Jakarta Bean Validation API
              (jakarta.validation:jakarta.validation-api:2.0.2)
              https://mvnrepository.com/artifact/org.hibernate.validator/hibernate-validator -->
@@ -61,13 +62,11 @@
         <dependency>
             <groupId>com.github.spotbugs</groupId>
             <artifactId>spotbugs-annotations</artifactId>
-            <version>4.6.0</version>
         </dependency>
         <!-- SLF4J via Logback -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.11</version>
         </dependency>
 
         <!-- Test dependencies -->
@@ -77,7 +76,6 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.8.2</version>
             <scope>test</scope>
         </dependency>
         <!-- JUnit 5 engine for running tests during maven build -->
@@ -85,7 +83,6 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.8.2</version>
             <scope>test</scope>
         </dependency>
         <!-- Mockito mocks -->
@@ -93,14 +90,12 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>4.4.0</version>
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>4.4.0</version>
             <scope>test</scope>
         </dependency>
 

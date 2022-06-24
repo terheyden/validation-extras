@@ -19,7 +19,6 @@ public class ValidationsTest {
 
         assertThrows(IllegalArgumentException.class, () -> Validations.validate(null));
         Validations.validate(good);
-
     }
 
     /**

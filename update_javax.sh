@@ -18,4 +18,4 @@ find javax-validation-extras/src -iname '*.java' \
     -exec perl -i -wlpE 's/import jakarta/import javax/g' "{}" \;
 
 # Update directories.
-mv javax-validation-extras/src/main/resources/META-INF/services/jakarta.validation.ConstraintValidator javax-validation-extras/src/main/resources/META-INF/services/javax.validation.ConstraintValidator
+# mv javax-validation-extras/src/main/resources/META-INF/services/jakarta.validation.ConstraintValidator javax-validation-extras/src/main/resources/META-INF/services/javax.validation.ConstraintValidator

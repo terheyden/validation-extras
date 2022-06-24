@@ -19,21 +19,39 @@ import static com.terheyden.valid.ValidationUtils.createViolationString;
 
 /**
  * Jakarta Bean Validation-related utilities.
- * Example usage — validate a User object, and print out any violations:
- *     Validations.validate(user).forEach(System.out::println);
  */
 public final class Validations {
 
-    /**
-     * The default validator.
+    /*
+     * The default validators.
      * Thread-safe, immutable, and reusable.
+     *
+     * These are not final. The user can add their own programmatic validators.
      */
-    /* package */ static final ValidatorFactory VALIDATOR_FACTORY = Validation.buildDefaultValidatorFactory();
-    /* package */ static final Validator VALIDATOR = VALIDATOR_FACTORY.getValidator();
-    /* package */ static final ExecutableValidator METHOD_VALIDATOR = VALIDATOR.forExecutables();
+
+    /* package */ static ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+    /* package */ static Validator validator = validatorFactory.getValidator();
+    /* package */ static ExecutableValidator methodValidator = validator.forExecutables();
 
     private Validations() {
         // Private since this class shouldn't be instantiated.
+    }
+
+    ////////////////////////////////////////
+    // CUSTOMIZATION
+
+    /**
+     * Switch from using the default Jakarta Bean Validation validator to a custom Hibernate-specific validator.
+     * This allows the user to dynamically associate validators with constraints.
+     */
+    public static void setValidator(ValidationsBuilder validationsBuilder) {
+        // This method isn't thread-safe. However, the validators don't have any state, and they
+        // don't depend on each other, so I really don't think there will be an issue.
+        // The worst thing that could happen is that one millisecond you're using the default validator,
+        // and the next millisecond you're using the custom one.
+        validatorFactory = validationsBuilder.build();
+        validator = validatorFactory.getValidator();
+        methodValidator = validator.forExecutables();
     }
 
     ////////////////////////////////////////
@@ -46,7 +64,7 @@ public final class Validations {
      *     Use {@link Validations#parseViolationMessages(Collection)} if you prefer easy-to-read string results
      */
     public static Set<? extends ConstraintViolation<?>> check(@Nullable Object objectToValidate) {
-        return VALIDATOR.validate(objectToValidate);
+        return validator.validate(objectToValidate);
     }
 
     /**
@@ -58,7 +76,7 @@ public final class Validations {
      */
     public static void validate(@Nullable Object objectToValidate) {
 
-        Set<ConstraintViolation<Object>> violations = VALIDATOR.validate(objectToValidate);
+        Set<ConstraintViolation<Object>> violations = validator.validate(objectToValidate);
 
         if (violations.isEmpty()) {
             return;
@@ -82,7 +100,7 @@ public final class Validations {
         Method methodToValidate,
         Object... allMethodParams) {
 
-        return METHOD_VALIDATOR.validateParameters(thisMethodObject, methodToValidate, allMethodParams);
+        return methodValidator.validateParameters(thisMethodObject, methodToValidate, allMethodParams);
     }
 
     /**
@@ -100,7 +118,7 @@ public final class Validations {
         Method methodToValidate,
         Object... methodParams) {
 
-        Set<ConstraintViolation<Object>> violations = METHOD_VALIDATOR.validateParameters(
+        Set<ConstraintViolation<Object>> violations = methodValidator.validateParameters(
             thisMethodObject,
             methodToValidate,
             methodParams);
@@ -124,7 +142,7 @@ public final class Validations {
         Constructor<?> constructorToValidate,
         Object... allConstructorParams) {
 
-        return METHOD_VALIDATOR.validateConstructorParameters(constructorToValidate, allConstructorParams);
+        return methodValidator.validateConstructorParameters(constructorToValidate, allConstructorParams);
     }
 
     /**
@@ -139,7 +157,7 @@ public final class Validations {
         Constructor<?> constructorToValidate,
         Object... constructorParams) {
 
-        Set<ConstraintViolation<Object>> violations = METHOD_VALIDATOR.validateConstructorParameters(
+        Set<ConstraintViolation<Object>> violations = methodValidator.validateConstructorParameters(
             constructorToValidate,
             constructorParams);
 

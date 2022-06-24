@@ -1,15 +1,13 @@
 package com.terheyden.valid.examples;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.util.Optional;
 
-import com.terheyden.valid.examples.MyConstraint.List;
-
-import jakarta.validation.Constraint;
-import jakarta.validation.ConstraintValidator;
-import jakarta.validation.Payload;
+import javax.validation.Constraint;
+import javax.validation.ConstraintValidator;
+import javax.validation.Payload;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
@@ -19,22 +17,19 @@ import static java.lang.annotation.ElementType.TYPE_USE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * TODO: The annotated element...
+ * Example constraint that affirms that an {@link Optional} has a value (is not empty).
  */
 @Documented
 @Retention(RUNTIME)
-// TODO: If this annotation cannot be repeated, delete @Repeatable and the nested List interface below.
-@Repeatable(List.class)
 @Target({ FIELD, METHOD, PARAMETER, ANNOTATION_TYPE, TYPE_USE })
-// TODO: If combining annotations you can set validatedBy = { }.
-@Constraint(validatedBy = MyConstraintValidator.class)
-public @interface MyConstraint {
+@Constraint(validatedBy = { })
+public @interface IsPresent {
 
     /**
      * Returns the default error message.
      * This is usually overridden by the {@link ConstraintValidator}.
      */
-    String message() default "Must be...";
+    String message() default "Optional value must be present.";
 
     /**
      * The groups (categories) to which this constraint belongs. Usually left blank.
@@ -45,20 +40,5 @@ public @interface MyConstraint {
      * Payload allows you to associate arbitrary data with the constraint. Usually left blank.
      */
     Class<? extends Payload>[] payload() default { };
-
-    /**
-     * TODO: 'value' is an annotation's default value, if needed.
-     */
-    String value() default "";
-
-    /**
-     * Gives support for repeating this annotation, usually with different settings.
-     * The Jakarta Bean Validation spec suggests using the @interface name 'List'.
-     */
-    @Documented
-    @Retention(RUNTIME)
-    @Target({ FIELD, METHOD, PARAMETER, ANNOTATION_TYPE })
-    @interface List {
-        MyConstraint[] value();
-    }
 }
+
