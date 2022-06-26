@@ -1,10 +1,15 @@
 package com.terheyden.valid;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.hibernate.validator.HibernateValidator;
 import org.hibernate.validator.HibernateValidatorConfiguration;
 import org.hibernate.validator.cfg.ConstraintMapping;
+import org.hibernate.validator.cfg.context.ConstraintDefinitionContext;
 import org.hibernate.validator.cfg.context.ConstraintDefinitionContext.ValidationCallable;
 
 import jakarta.validation.ConstraintValidator;
@@ -48,6 +53,16 @@ public class ValidationsBuilder {
     private final ConstraintMapping constraintMapping = configuration.createConstraintMapping();
 
     /**
+     * When utilizing the fluent builder, we need to group mappings by annotation type,
+     * so this map is used to store the mappings.
+     *
+     * An annotation may either be mapped to a validation class (@link ConstraintMapToClass)
+     * or a validation function (@link ConstraintMapToFunction). Both of those types extend
+     * {@link ConstraintMapper}.
+     */
+    private final Map<Class, List<ConstraintMapper>> constraints = new HashMap<>();
+
+    /**
      * Programmatically add a validator to a constraint annotation.
      *
      * @param annotationClass the constraint annotation to associate with the validator
@@ -61,9 +76,13 @@ public class ValidationsBuilder {
         Class<A> annotationClass,
         Class<? extends ConstraintValidator<A, ?>> validatorClass) {
 
-        constraintMapping
-            .constraintDefinition(annotationClass)
-            .validatedBy(validatorClass);
+        // A validation annotation may have multiple types associated with it
+        // (for example, @NotEmpty works for Strings and Lists and each type needs its own validator).
+        // We store those mappings and build them all at the end.
+        constraints.computeIfAbsent(
+            annotationClass,
+            annClass -> new ArrayList<>()
+            ).add(new ConstraintMapToClass<>(annotationClass, validatorClass));
 
         return this;
     }
@@ -84,9 +103,13 @@ public class ValidationsBuilder {
         Class<T> typeToValidate,
         ValidationCallable<T> validationFunction) {
 
-        constraintMapping.constraintDefinition(annotationClass)
-            .validateType(typeToValidate)
-            .with(validationFunction);
+        // A validation annotation may have multiple types associated with it
+        // (for example, @NotEmpty works for Strings and Lists and each type needs its own validator).
+        // We store those mappings and build them all at the end.
+        constraints.computeIfAbsent(
+            annotationClass,
+            annClass -> new ArrayList<>()
+            ).add(new ConstraintMapToFunction<>(annotationClass, typeToValidate, validationFunction));
 
         return this;
     }
@@ -121,6 +144,24 @@ public class ValidationsBuilder {
      * Build the custom validation factory.
      */
     /* package */ ValidatorFactory build() {
+
+        // A validation annotation may only be defined ONCE in [constraintMapping].
+        // Here's an example of how to add two validators:
+        //     constraintMapping
+        //         .constraintDefinition(IsNull.class)
+        //             .validatedBy(IsNullValidator.class) // mapping 1
+        //             .validateType(String.class)         // mapping 2
+        //                 .with(str -> str == null)
+
+        for (Class annotationClass : constraints.keySet()) {
+
+            ConstraintDefinitionContext constraintCtx = constraintMapping.constraintDefinition(annotationClass);
+
+            for (ConstraintMapper constraint : constraints.get(annotationClass)) {
+                constraint.addConstraint(constraintCtx);
+            }
+        }
+
         return configuration.addMapping(constraintMapping).buildValidatorFactory();
     }
 }

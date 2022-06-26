@@ -44,6 +44,12 @@ public class ValidationsBuilderTest {
             List.class,
             list -> list == null || list.isEmpty());
 
+        // Check it out, we can assign multiple validators to the same annotation now.
+        builder.addConstraintValidator(
+            Empty.class,
+            String.class,
+            str -> str == null || str.isEmpty());
+
         // Attach the new custom validations.
         Validations.setValidator(builder);
 
@@ -54,6 +60,7 @@ public class ValidationsBuilderTest {
         // And these should fail:
         assertThrows(ConstraintViolationException.class, () -> sayHello(Optional.empty()));
         assertThrows(ConstraintViolationException.class, () -> Validations.validate(new Basket("bread")));
+        assertThrows(ConstraintViolationException.class, () -> Validations.validate(new Basket().setId("100")));
     }
 
     /**
@@ -75,6 +82,9 @@ public class ValidationsBuilderTest {
         @Empty
         private final List<String> items = new ArrayList<>();
 
+        @Empty
+        private String id = "";
+
         private Basket() {
             // Empty basket constructor.
         }
@@ -93,6 +103,15 @@ public class ValidationsBuilderTest {
 
         private List<String> getItems() {
             return items;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public Basket setId(String id) {
+            this.id = id;
+            return this;
         }
     }
 }

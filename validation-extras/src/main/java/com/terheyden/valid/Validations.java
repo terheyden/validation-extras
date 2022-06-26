@@ -43,12 +43,16 @@ public final class Validations {
     /**
      * Switch from using the default Jakarta Bean Validation validator to a custom Hibernate-specific validator.
      * This allows the user to dynamically associate validators with constraints.
+     * <p>
+     * This method isn't thread-safe. However, the validators don't have any state, and they
+     * don't depend on each other, so I really don't think there will be an issue.
+     * The worst thing that could happen is that one millisecond you're using the default validator,
+     * and the next millisecond you're using the custom one.
+     * <p>
+     * There might be an issue also if you call setValidator() multiple times, on multiple threads,
+     * at the exact same time.
      */
     public static void setValidator(ValidationsBuilder validationsBuilder) {
-        // This method isn't thread-safe. However, the validators don't have any state, and they
-        // don't depend on each other, so I really don't think there will be an issue.
-        // The worst thing that could happen is that one millisecond you're using the default validator,
-        // and the next millisecond you're using the custom one.
         validatorFactory = validationsBuilder.build();
         validator = validatorFactory.getValidator();
         methodValidator = validator.forExecutables();
