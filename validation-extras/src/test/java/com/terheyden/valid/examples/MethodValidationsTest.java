@@ -1,8 +1,11 @@
-package com.terheyden.valid;
+package com.terheyden.valid.examples;
 
 import org.hibernate.validator.constraints.Length;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
+
+import com.terheyden.valid.MethodValidator;
+import com.terheyden.valid.Validations;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

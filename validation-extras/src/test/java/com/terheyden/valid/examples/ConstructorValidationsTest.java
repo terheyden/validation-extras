@@ -1,8 +1,11 @@
-package com.terheyden.valid;
+package com.terheyden.valid.examples;
 
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
+
+import com.terheyden.valid.ConstructorValidator;
+import com.terheyden.valid.Validations;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
