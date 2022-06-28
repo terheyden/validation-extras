@@ -265,13 +265,21 @@ Below is a concise summary:
 
 ## How to assign a constraint validator programmatically
 
-Decorating your data classes with constraints, `@NotNull`, etc. makes sense in a 'lib' or 'dto' layer
-that other projects can import. However, validators might make more sense in a logic or 'service' layer.
-So how do we decouple the two?
+Oftentimes we want to annotate data classes in a library that is kept separate from the logic layer.
+For example, we might have a 'lib' jar that we share with other services so they may see our data types,
+a UI layer for our REST controllers, and service layer for our business logic.
 
-Luckily there are a few different ways to accomplish this, which you can read about in the
+In these instances, our validation constraints would live in the lib jar, but our validators
+would most likely live in the service layer. It would be impossible to link the two together
+(assuming the lib doesn't know about the service layer):
+
+![](media/validator-in-another-layer.jpg)
+
+Here we'll discuss two ways to accomplish this separation by dynamically associating constraints with validators.
+You can read more about this subject in the
 [implementation docs](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-constraint-definition-contribution).
-Below, let's outline the easiest way to do it.
+
+### For production code
 
 1. Create your constraint but leave the validator _empty_
    1. So it would look like: `@Constraint(validatedBy = { })`
@@ -288,7 +296,7 @@ _Example `src/main/resources/META-INF/services/jakarta.validation.ConstraintVali
 com.terheyden.validation.constraints.NotNullValidator
 ```
 
-### Easy copy-and-paste
+#### Easy copy-and-paste
 
 Run the shell command below to create the metadata resource dir and touch the constraint metadata file:
 
@@ -300,6 +308,33 @@ mkdir -pv src/main/resources/META-INF/services && touch src/main/resources/META-
 ```
 
 Now, in your IDE, just search for the file and add to it.
+
+### For testing
+
+Unit tests sometimes don't pick up the `META-INF` relationships described above, so `validation-extras` provides another
+way to set up the constraint-validator relationship.
+
+```java
+// We're going to create a custom link between a constraint annotation and a validator.
+// To do this, we start with a ValidationsBuilder:
+ValidationsBuilder builder = new ValidationsBuilder();
+// Then we simply connect the two:
+builder.addConstraintValidator(IsPresent.class, IsPresentValidator.class);
+
+// If our validator is really straightforward,
+// we can even just use a Lambda Function to define it:
+builder.addConstraintValidator(
+    Empty.class,                             // The constraint annotation
+    List.class,                              // The type we expect to validate
+    list -> list == null || list.isEmpty()); // The validation logic (true == is valid)
+
+// Once we're done configuring, we can inject our changes
+// into the global validator.
+Validations.setValidator(builder);
+```
+(The code above comes from
+[ValidationsBuilderTest.java](https://github.com/terheyden/validation-extras/blob/main/validation-extras/src/test/java/com/terheyden/valid/ValidationsBuilderTest.java)
+in this repository in case you want to see the full example.)
 
 ## How to create a class-level constraint
 

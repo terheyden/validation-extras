@@ -1,6 +1,7 @@
 package com.terheyden.valid;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 /**
  * Helper class just for validating method parameters.
@@ -38,13 +39,18 @@ import java.lang.reflect.Method;
                         .formatted(methodName, classType.getName()));
                 }
 
+                // Disqualify static methods.
+                if (Modifier.isStatic(method.getModifiers())) {
+                    continue;
+                }
+
                 // It's the first match.
                 foundMethod = method;
             }
 
             if (foundMethod == null) {
                 throw new IllegalStateException(
-                    "No method found with name '%s' in class '%s'."
+                    "No (non-static) method found with name '%s' in class '%s'."
                     .formatted(methodName, classType.getName()));
             } else {
                 // All methods checked, only one match found, so return it.
@@ -97,13 +103,18 @@ import java.lang.reflect.Method;
                         .formatted(methodName, classType.getName(), anyParamType));
                 }
 
+                // Disqualify static methods.
+                if (Modifier.isStatic(method.getModifiers())) {
+                    continue;
+                }
+
                 // It's the first match.
                 foundMethod = method;
             }
 
             if (foundMethod == null) {
                 throw new IllegalStateException(
-                    "No method found with name '%s' in class '%s' and parameter type '%s'."
+                    "No (non-static) method found with name '%s' in class '%s' and parameter type '%s'."
                     .formatted(methodName, classType.getName(), anyParamType));
             } else {
                 // All methods checked, only one match found, so return it.
@@ -149,13 +160,18 @@ import java.lang.reflect.Method;
                         .formatted(methodName, classType.getName(), paramCount));
                 }
 
+                // Disqualify static methods.
+                if (Modifier.isStatic(method.getModifiers())) {
+                    continue;
+                }
+
                 // It's the first match.
                 foundMethod = method;
             }
 
             if (foundMethod == null) {
                 throw new IllegalStateException(
-                    "No method found with name '%s' in class '%s' and %d parameters."
+                    "No (non-static) method found with name '%s' in class '%s' and %d parameters."
                     .formatted(methodName, classType.getName(), paramCount));
             } else {
                 // All methods checked, only one match found, so return it.
