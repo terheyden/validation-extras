@@ -355,6 +355,21 @@ and take a look at the working example in this repo:
 * [OffsetLessThanStringLengthValidator.java](https://github.com/terheyden/validation-extras/blob/main/validation-extras/src/test/java/com/terheyden/valid/examples/OffsetLessThanStringLengthValidator.java)
 * [OffsetLessThanStringLengthValidatorTest.java](https://github.com/terheyden/validation-extras/blob/main/validation-extras/src/test/java/com/terheyden/valid/examples/OffsetLessThanStringLengthValidatorTest.java)
 
+## Working around method validators / self-validating objects
+
+By using static factory methods, or builders, you can
+create self-validating objects that don't need method / constructor validators.
+Check out `ValidCat.java` and `ValidCatTest.java` in this repo for an example.
+
+```java
+/**
+ * By using a static factory method (or a builder), we can be self-validating.
+ */
+public static MyObj newMyObj(String name, int age) {
+    return Validations.validate(new MyObj(name, age));
+}
+```
+
 # Performance considerations
 
 Processing annotations might have you wondering about the performance impact of using

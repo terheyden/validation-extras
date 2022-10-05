@@ -7,20 +7,20 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import jakarta.validation.ConstraintValidatorContext;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-import jakarta.validation.executable.ExecutableValidator;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import javax.validation.executable.ExecutableValidator;
 
 import static com.terheyden.valid.ValidationUtils.createViolationString;
 
 /**
  * Jakarta Bean Validation-related utilities.
  */
-public final class Validations {
+public final class Validators {
 
     /*
      * The default validators.
@@ -33,7 +33,7 @@ public final class Validations {
     /* package */ static Validator validator = validatorFactory.getValidator();
     /* package */ static ExecutableValidator methodValidator = validator.forExecutables();
 
-    private Validations() {
+    private Validators() {
         // Private since this class shouldn't be instantiated.
     }
 
@@ -65,7 +65,7 @@ public final class Validations {
      * Perform Jakarta Bean Validation on the given object, returning any error strings.
      *
      * @return a set of constraint violations, or an empty set if no violations were found.
-     *     Use {@link Validations#parseViolationMessages(Collection)} if you prefer easy-to-read string results
+     *     Use {@link Validators#parseViolationMessages(Collection)} if you prefer easy-to-read string results
      */
     public static Set<? extends ConstraintViolation<?>> check(@Nullable Object objectToValidate) {
         return validator.validate(objectToValidate);

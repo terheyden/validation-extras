@@ -77,13 +77,14 @@ public final class Validations {
      * @param objectToValidate the object to validate; may not be null
      * @throws IllegalArgumentException if the object to validate is null
      * @throws ConstraintViolationException if any violations are found
+     * @return {@code objectToValidate}, for chaining
      */
-    public static void validate(@Nullable Object objectToValidate) {
+    public static <T> T validate(@Nullable T objectToValidate) {
 
         Set<ConstraintViolation<Object>> violations = validator.validate(objectToValidate);
 
         if (violations.isEmpty()) {
-            return;
+            return objectToValidate;
         }
 
         throw new ConstraintViolationException(createViolationString(violations), violations);

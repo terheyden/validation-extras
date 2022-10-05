@@ -8,6 +8,17 @@ rm validation-extras.zip
 zip -r validation-extras.zip validation-extras
 cd validation-extras
 
+# Copy Validations.java to Validators.java:
+validir=validation-extras/src/main/java/com/terheyden/valid
+cp $validir/Validations.java $validir/Validators.java
+perl -i -wlpE 's/ Validations/ Validators/g' $validir/Validators.java
+
+validir=validation-extras/src/test/java/com/terheyden/valid
+cp $validir/ValidationsTest.java $validir/ValidatorsTest.java
+perl -i -wlpE 's/ValidationsTest/ValidatorsTest/g' $validir/ValidatorsTest.java
+perl -i -wlpE 's/ Validations/ Validators/g' $validir/ValidatorsTest.java
+
+# Copy jakarta -> javax:
 rm -rf javax-validation-extras/src
 cp -R validation-extras/src javax-validation-extras
 
