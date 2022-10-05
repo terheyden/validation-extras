@@ -6,7 +6,7 @@
     <groupId>com.terheyden</groupId>
     <artifactId>validation-extras-parent</artifactId>
     <name>validation-extras-parent</name>
-    <version>0.0.6</version> <!-- here -->
+    <version>0.0.7-SNAPSHOT</version> <!-- here -->
     <description>Jakarta Bean Validation extras</description>
     <packaging>pom</packaging>
     <url>http://github.com/terheyden/validation-extras</url>
