@@ -103,6 +103,19 @@ Validations.createConstructorValidator(...) — creates validator for a class co
 Validations.violation(...)                  — used in custom constraints: helps creates violation messages
 ``````
 
+### Extra annotations
+
+Check out the [reference docs](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#validator-defineconstraints-spec)
+for the list of built-in annotations, or see my summary in the cookbook below.
+This is a list of extra annotations that this library adds:
+
+```
+@PathExists    — checks if a Path or File exists
+@PathNotExists — checks if a Path or File does not already exist
+@IsDirectory   — checks that a Path or File exists and is a directory
+@IsRegularFile — checks that a Path or File exists and is a file
+```
+
 Those are the basics. More details and examples are down below.
 
 # Maven
