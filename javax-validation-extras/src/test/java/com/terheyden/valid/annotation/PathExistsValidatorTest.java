@@ -45,6 +45,9 @@ public class PathExistsValidatorTest {
         // Test that the bad paths throw.
         assertThrows(ConstraintViolationException.class, () -> PATHS.validateParams(this, badPath));
         assertThrows(ConstraintViolationException.class, () -> FILES.validateParams(this, badFile));
+
+        // Test this obj as a whole, which will test the method annotations.
+        Validations.validate(this);
     }
 
     public void pathTester(@PathExists Path path) {
@@ -53,5 +56,15 @@ public class PathExistsValidatorTest {
 
     public void fileTester(@PathExists File file) {
         LOG.debug("{}", file);
+    }
+
+    @PathExists
+    public Path getGoodPath() {
+        return goodPath;
+    }
+
+    @PathExists
+    public File getGoodFile() {
+        return goodFile;
     }
 }

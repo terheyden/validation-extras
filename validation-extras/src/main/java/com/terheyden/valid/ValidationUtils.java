@@ -1,8 +1,8 @@
 package com.terheyden.valid;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 
@@ -85,12 +85,13 @@ import static org.slf4j.LoggerFactory.getLogger;
      *     <li>{@link ConstructorValidator#checkParams(Object...)}</li>
      * </ul>
      */
-    /* package */ static Stream<String> parseViolationMessages(
-        Collection<? extends ConstraintViolation<Object>> violations) {
+    /* package */ static <T> List<String> parseViolationMessages(
+        Collection<? extends ConstraintViolation<T>> violations) {
 
         return violations
             .stream()
-            .map(ValidationUtils::createViolationString);
+            .map(ValidationUtils::createViolationString)
+            .toList();
     }
 
     /**

@@ -4,8 +4,8 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.ConstraintViolation;
@@ -67,7 +67,7 @@ public final class Validations {
      * @return a set of constraint violations, or an empty set if no violations were found.
      *     Use {@link Validations#parseViolationMessages(Collection)} if you prefer easy-to-read string results
      */
-    public static Set<? extends ConstraintViolation<?>> check(@Nullable Object objectToValidate) {
+    public static <T> Set<ConstraintViolation<T>> check(@Nullable T objectToValidate) {
         return validator.validate(objectToValidate);
     }
 
@@ -297,7 +297,7 @@ public final class Validations {
      *     <li>{@link ConstructorValidator#checkParams(Object...)}</li>
      * </ul>
      */
-    public static Stream<String> parseViolationMessages(Collection<? extends ConstraintViolation<Object>> violations) {
+    public static <T> List<String> parseViolationMessages(Collection<? extends ConstraintViolation<T>> violations) {
         return ValidationUtils.parseViolationMessages(violations);
     }
 
