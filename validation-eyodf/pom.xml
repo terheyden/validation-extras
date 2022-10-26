@@ -24,7 +24,7 @@
         <dependency>
             <groupId>com.terheyden</groupId>
             <artifactId>javax-validation-extras</artifactId>
-            <version>0.0.8-SNAPSHOT</version> <!-- here -->
+            <version>0.0.8</version> <!-- here -->
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
