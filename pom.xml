@@ -41,8 +41,8 @@
     </properties>
 
     <modules>
-        <module>jakarta-validations3</module>
-        <module>javax-validations2</module>
+        <module>jakarta-validation</module>
+        <module>javax-validation</module>
     </modules>
 
     <dependencyManagement>
