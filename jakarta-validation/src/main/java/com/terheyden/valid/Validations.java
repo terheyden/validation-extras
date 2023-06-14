@@ -15,6 +15,7 @@ import jakarta.validation.Path;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import jakarta.validation.executable.ExecutableValidator;
 import jakarta.validation.metadata.ConstraintDescriptor;
 
 import static java.lang.String.format;
@@ -26,16 +27,22 @@ import static java.lang.String.format;
 public final class Validations {
 
     /**
-     * The default validator factory used by this class.
+     * The default validator factory.
      * Immutable and thread-safe.
      */
     public static final ValidatorFactory FACTORY = Validation.buildDefaultValidatorFactory();
 
     /**
-     * The default validator used by this class.
+     * The default validator.
      * Immutable and thread-safe.
      */
     public static final Validator VALIDATOR = FACTORY.getValidator();
+
+    /**
+     * The default executable validator.
+     * Immutable and thread-safe.
+     */
+    public static final ExecutableValidator EXECUTABLE_VALIDATOR = VALIDATOR.forExecutables();
 
     // Thrown when we try to validate a null object.
     private static final NullOriginViolation NULL_ORIGIN_VIOLATION = new NullOriginViolation();
