@@ -59,7 +59,7 @@ public class ValidationsTest {
     /**
      * For testing validation.
      */
-    private static class User1 {
+    private static class User1 implements BaseUser {
         private final String name;
         private final int age;
 
@@ -70,11 +70,13 @@ public class ValidationsTest {
 
         @NotNull
         @Size(min = 2)
+        @Override
         public String getName() {
             return name;
         }
 
         @Min(1)
+        @Override
         public int getAge() {
             return age;
         }
@@ -83,7 +85,7 @@ public class ValidationsTest {
     /**
      * This class is self-validating.
      */
-    private static class User2 {
+    private static class User2 implements BaseUser {
         private final String name;
         private final int age;
 
@@ -99,13 +101,20 @@ public class ValidationsTest {
 
         @NotNull
         @Size(min = 2)
+        @Override
         public String getName() {
             return name;
         }
 
         @Min(1)
+        @Override
         public int getAge() {
             return age;
         }
+    }
+
+    private interface BaseUser {
+        String getName();
+        int getAge();
     }
 }

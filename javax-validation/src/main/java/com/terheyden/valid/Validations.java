@@ -15,6 +15,7 @@ import javax.validation.Path;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
+import javax.validation.executable.ExecutableValidator;
 import javax.validation.metadata.ConstraintDescriptor;
 
 import static java.lang.String.format;
@@ -26,16 +27,22 @@ import static java.lang.String.format;
 public final class Validations {
 
     /**
-     * The default validator factory used by this class.
+     * The default validator factory.
      * Immutable and thread-safe.
      */
     public static final ValidatorFactory FACTORY = Validation.buildDefaultValidatorFactory();
 
     /**
-     * The default validator used by this class.
+     * The default validator.
      * Immutable and thread-safe.
      */
     public static final Validator VALIDATOR = FACTORY.getValidator();
+
+    /**
+     * The default executable validator.
+     * Immutable and thread-safe.
+     */
+    public static final ExecutableValidator EXECUTABLE_VALIDATOR = VALIDATOR.forExecutables();
 
     // Thrown when we try to validate a null object.
     private static final NullOriginViolation NULL_ORIGIN_VIOLATION = new NullOriginViolation();
@@ -58,6 +65,56 @@ public final class Validations {
         return objectToValidate == null
             ? Collections.singleton(NULL_ORIGIN_VIOLATION)
             : VALIDATOR.validate(objectToValidate);
+    }
+
+    public static <T> Set<ConstraintViolation<T>> checkParameters(T thisObj, Object... methodParams) {
+        try {
+
+            return ParamValidation.checkParameters(thisObj, methodParams);
+
+        } catch (Exception e) {
+            return throwUnchecked(e);
+        }
+    }
+
+    public static Set<ConstraintViolation<Object>> checkConstructorParams(Object... constructorParams) {
+        try {
+
+            return ParamValidation.checkConstructorParams(constructorParams);
+
+        } catch (Exception e) {
+            return throwUnchecked(e);
+        }
+    }
+
+    public static void validateParameters(Object thisObj, Object... methodParams) {
+
+        Set<ConstraintViolation<Object>> violations = null;
+
+        try {
+            violations = ParamValidation.checkParameters(thisObj, methodParams);
+        } catch (Exception e) {
+            throwUnchecked(e);
+        }
+
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+    }
+
+    public static void validateConstructorParams(Object... methodParams) {
+
+        Set<ConstraintViolation<Object>> violations = null;
+
+        try {
+            violations = ParamValidation.checkConstructorParams(methodParams);
+        } catch (Exception e) {
+            throwUnchecked(e);
+        }
+
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
     }
 
     /**
@@ -141,6 +198,14 @@ public final class Validations {
         return violations.stream()
             .map(Validations::violationToString)
             .collect(Collectors.joining("; "));
+    }
+
+    /**
+     * Throw any exception unchecked.
+     */
+    @SuppressWarnings("unchecked")
+    private static <E extends Throwable, R> R throwUnchecked(Throwable throwable) throws E {
+        throw (E) throwable;
     }
 
     /**
