@@ -67,6 +67,56 @@ public final class Validations {
             : VALIDATOR.validate(objectToValidate);
     }
 
+    public static <T> Set<ConstraintViolation<T>> checkParameters(T thisObj, Object... methodParams) {
+        try {
+
+            return ParamValidation.checkParameters(thisObj, methodParams);
+
+        } catch (Exception e) {
+            return throwUnchecked(e);
+        }
+    }
+
+    public static Set<ConstraintViolation<Object>> checkConstructorParams(Object... constructorParams) {
+        try {
+
+            return ParamValidation.checkConstructorParams(constructorParams);
+
+        } catch (Exception e) {
+            return throwUnchecked(e);
+        }
+    }
+
+    public static void validateParameters(Object thisObj, Object... methodParams) {
+
+        Set<ConstraintViolation<Object>> violations = null;
+
+        try {
+            violations = ParamValidation.checkParameters(thisObj, methodParams);
+        } catch (Exception e) {
+            throwUnchecked(e);
+        }
+
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+    }
+
+    public static void validateConstructorParams(Object... methodParams) {
+
+        Set<ConstraintViolation<Object>> violations = null;
+
+        try {
+            violations = ParamValidation.checkConstructorParams(methodParams);
+        } catch (Exception e) {
+            throwUnchecked(e);
+        }
+
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
+    }
+
     /**
      * Perform Jakarta Bean Validation on the given object, returning any violations as Human-readable strings.
      * To throw an exception if any violations are found, use {@link #validate(Object)} instead.
@@ -148,6 +198,14 @@ public final class Validations {
         return violations.stream()
             .map(Validations::violationToString)
             .collect(Collectors.joining("; "));
+    }
+
+    /**
+     * Throw any exception unchecked.
+     */
+    @SuppressWarnings("unchecked")
+    private static <E extends Throwable, R> R throwUnchecked(Throwable throwable) throws E {
+        throw (E) throwable;
     }
 
     /**

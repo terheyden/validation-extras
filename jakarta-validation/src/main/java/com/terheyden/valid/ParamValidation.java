@@ -6,7 +6,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -29,87 +27,49 @@ final class ParamValidation {
         // Private since this class shouldn't be instantiated.
     }
 
-    private static <T> Set<ConstraintViolation<T>> checkMethodParamsInternal(
-        T thisObj,
-        int stackDepth,
-        Object[] methodParams) {
+    static <T> Set<ConstraintViolation<T>> checkParameters(T thisObj, Object[] methodParams) {
 
-        StackFrame currentStackFrame = Reflections.getCurrentStackFrame(stackDepth);
-        String currentMethodName = currentStackFrame.getMethodName();
-        Class<?> thisObjClass = thisObj.getClass();
-        Method currentMethod = findMatchingMethod(thisObjClass, currentMethodName, methodParams);
+        StackFrame stackFrame = Reflections.getCurrentStackFrame(3);
+        String methodName = stackFrame.getMethodName();
 
-        return Validations.EXECUTABLE_VALIDATOR.validateParameters(
-            thisObj, currentMethod, methodParams);
+        return checkMethodParamsInternal(thisObj, methodName, methodParams);
     }
 
-    private static <T> Set<ConstraintViolation<T>> checkConstructorParamsInternal(
+    private static <T> Set<ConstraintViolation<T>> checkMethodParamsInternal(
         T thisObj,
+        String currentMethodName,
+        Object[] methodParams) {
+
+        Class<?> thisObjClass = thisObj.getClass();
+        Method currentMethod = findMatchingMethod(thisObjClass, currentMethodName, methodParams);
+        return Validations.EXECUTABLE_VALIDATOR.validateParameters(thisObj, currentMethod, methodParams);
+    }
+
+    static Set<ConstraintViolation<Object>> checkConstructorParams(Object[] paramValues) throws Exception {
+
+        StackFrame stackFrame = Reflections.getCurrentStackFrame(3);
+        String thisClassName = stackFrame.getClassName();
+        Class<?> thisObjClass = Class.forName(thisClassName);
+
+        return checkConstructorParamsInternal(thisObjClass, paramValues);
+    }
+
+    private static Set<ConstraintViolation<Object>> checkConstructorParamsInternal(
+        Class<?> thisObjClass,
         Object[] constructorParams) {
 
-        Class<T> thisObjClass = (Class<T>) thisObj.getClass();
-        Constructor<T> constructor = (Constructor<T>) findMatchingConstructor(thisObjClass, constructorParams);
-
+        Constructor<Object> constructor = findMatchingConstructor(thisObjClass, constructorParams);
         return Validations.EXECUTABLE_VALIDATOR.validateConstructorParameters(constructor, constructorParams);
     }
 
-    static <T> Set<ConstraintViolation<T>> checkMethodParams(T thisObj, Object... methodParams) {
-        return checkMethodParamsInternal(thisObj, 3, methodParams);
-    }
-
-    static List<String> checkMethodParamsToList(Object thisObj, Object... methodParams) {
-        return checkMethodParamsInternal(thisObj, 3, methodParams)
-            .stream()
-            .map(Validations::violationToString)
-            .collect(Collectors.toList());
-    }
-
-    static String checkMethodParamsToString(Object thisObj, Object... methodParams) {
-        return Validations.violationsToString(checkMethodParamsInternal(thisObj, 3, methodParams));
-    }
-
-    /**
-     * Validate the parameters of the current method using Jakarta Bean Validation annotations.
-     * @param thisObj should literally be {@code this}
-     * @param methodParams all parameters passed to the current method, in proper order
-     * @return {@code this}, for chaining
-     */
-    static <T> T validateMethodParams(T thisObj, Object... methodParams) {
-
-        Set<ConstraintViolation<T>> violations = checkMethodParamsInternal(thisObj, 3, methodParams);
-
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }
-
-        return thisObj;
-    }
-
-    /**
-     * Validate the parameters of the current method using Jakarta Bean Validation annotations.
-     * @param thisObj should literally be {@code this}
-     * @param methodParams all parameters passed to the current method, in proper order
-     * @return {@code this}, for chaining
-     */
-    static <T> T validateConstructorParams(T thisObj, Object... methodParams) {
-
-        Set<ConstraintViolation<T>> violations = checkConstructorParamsInternal(thisObj, methodParams);
-
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }
-
-        return thisObj;
-    }
-
-    static Method findMatchingMethod(Class<?> methodClass, String methodName, Object[] paramValues) {
+    private static Method findMatchingMethod(Class<?> methodClass, String methodName, Object[] paramValues) {
         return findSingularMatchingMethod(methodClass, methodName)
             .or(() -> findSimilarMatchingMethod(methodClass, methodName, paramValues))
             .or(() -> findMethodByParamCount(methodClass, methodName, paramValues.length))
             .orElseThrow(() -> new IllegalArgumentException("No matching method found."));
     }
 
-    static Constructor findMatchingConstructor(Class<?> constructorClass, Object[] paramValues) {
+    private static Constructor<Object> findMatchingConstructor(Class<?> constructorClass, Object[] paramValues) {
         return findSingularMatchingConstructor(constructorClass)
             .or(() -> findSimilarMatchingConstructor(constructorClass, paramValues))
             .or(() -> findConstructorByParamCount(constructorClass, paramValues.length))
@@ -134,35 +94,12 @@ final class ParamValidation {
     /**
      * If there is a single constructor, return it.
      */
-    static Optional<Constructor> findSingularMatchingConstructor(Class<?> constructorClass) {
-        Constructor<?>[] constructors = constructorClass.getDeclaredConstructors();
+    @SuppressWarnings("unchecked")
+    private static Optional<Constructor<Object>> findSingularMatchingConstructor(Class<?> constructorClass) {
+        Constructor[] constructors = constructorClass.getDeclaredConstructors();
         return constructors.length == 1
-            ? Optional.of(constructors[0])
+            ? Optional.of((Constructor<Object>) constructors[0])
             : Optional.empty();
-    }
-
-    /**
-     * Try to find an exact match based on param class types.
-     * Returns Optional instead of throwing.
-     */
-    static Optional<Method> findExactMatchingMethod(Class<?> methodClass, String methodName, Object[] paramValues) {
-
-        // If any of the values are null, we can't find with an exact match.
-        if (Arrays.stream(paramValues).anyMatch(Objects::isNull)) {
-            return Optional.empty();
-        }
-
-        Class<?>[] paramTypes = Arrays.stream(paramValues).map(Object::getClass).toArray(Class<?>[]::new);
-
-        try {
-
-            return Optional.of(methodClass.getDeclaredMethod(methodName, paramTypes));
-
-        } catch (Exception e) {
-            LOG.error("Error finding exact matching method '{}' in '{}' with parameters: {}",
-                methodName, methodClass.getSimpleName(), Arrays.asList(paramTypes), e);
-            return Optional.empty();
-        }
     }
 
     /**
@@ -170,7 +107,7 @@ final class ParamValidation {
      * If a param is null, keep going and check the others.
      * If a param is not null, do an instanceof check instead of exact class match.
      */
-    static Optional<Method> findSimilarMatchingMethod(Class<?> methodClass, String methodName, Object[] paramValues) {
+    private static Optional<Method> findSimilarMatchingMethod(Class<?> methodClass, String methodName, Object[] paramValues) {
         return Arrays.stream(methodClass.getDeclaredMethods())
             .filter(method -> method.getName().equals(methodName))
             .filter(method -> isSimilarMethod(method, paramValues))
@@ -182,11 +119,15 @@ final class ParamValidation {
      * If a param is null, keep going and check the others.
      * If a param is not null, do an instanceof check instead of exact class match.
      */
-    static Optional<Constructor> findSimilarMatchingConstructor(Class<?> constructorClass, Object[] paramValues) {
+    @SuppressWarnings("unchecked")
+    private static Optional<Constructor<Object>> findSimilarMatchingConstructor(
+        Class<?> constructorClass,
+        Object[] paramValues) {
+
         return Arrays.stream(constructorClass.getDeclaredConstructors())
             .filter(constructor -> isSimilarConstructor(constructor, paramValues))
-            .map(Constructor.class::cast)
-            .findFirst();
+            .findFirst()
+            .map(constructor -> (Constructor<Object>) constructor);
     }
 
     /**
@@ -227,7 +168,7 @@ final class ParamValidation {
      * If a param is null, keep going and check the others.
      * If a param is not null, do an instanceof check instead of exact class match.
      */
-    static boolean isSimilarConstructor(Constructor constructor, Object[] paramValues) {
+    static boolean isSimilarConstructor(Constructor<?> constructor, Object[] paramValues) {
 
         Class<?>[] paramTypes = constructor.getParameterTypes();
         if (paramTypes.length != paramValues.length) {
@@ -255,32 +196,6 @@ final class ParamValidation {
         return true;
     }
 
-    /**
-     * Try to find an exact match based on param class types.
-     * Returns Optional instead of throwing.
-     */
-    static Optional<Constructor> findExactMatchingConstructor(
-        Class<?> constructorClass,
-        Object[] paramValues) {
-
-        // If any of the values are null, we can't find with an exact match.
-        if (Arrays.stream(paramValues).anyMatch(Objects::isNull)) {
-            return Optional.empty();
-        }
-
-        Class<?>[] paramTypes = Arrays.stream(paramValues).map(Object::getClass).toArray(Class<?>[]::new);
-
-        try {
-
-            return Optional.of(constructorClass.getDeclaredConstructor(paramTypes));
-
-        } catch (Exception e) {
-            LOG.error("Error finding exact matching constructor in '{}' with parameters: {}",
-                constructorClass.getSimpleName(), Arrays.asList(paramTypes), e);
-            return Optional.empty();
-        }
-    }
-
     static Optional<Method> findMethodByParamCount(Class<?> methodClass, String methodName, int paramCount) {
 
         List<Method> matchingMethods = Arrays
@@ -306,9 +221,10 @@ final class ParamValidation {
         return Optional.of(matchingMethods.get(0));
     }
 
-    static Optional<Constructor> findConstructorByParamCount(Class<?> constructorClass, int paramCount) {
+    @SuppressWarnings("unchecked")
+    private static Optional<Constructor<Object>> findConstructorByParamCount(Class<?> constructorClass, int paramCount) {
 
-        List<Constructor> matchingConstructors = Arrays
+        List<Constructor<?>> matchingConstructors = Arrays
             .stream(constructorClass.getDeclaredConstructors())
             .filter(constructor -> constructor.getParameterCount() == paramCount)
             .collect(Collectors.toList());
@@ -327,6 +243,6 @@ final class ParamValidation {
             return Optional.empty();
         }
 
-        return Optional.of(matchingConstructors.get(0));
+        return Optional.of((Constructor<Object>) matchingConstructors.get(0));
     }
 }

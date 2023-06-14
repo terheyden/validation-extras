@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -29,15 +30,21 @@ class ParamValidationTest {
 
     @Test
     void goodSubclassedMethodParams() {
-        Square square = new Square();
+        Square square = new Square("square", 4);
         shapeToString(square);
+    }
+
+    @Test
+    void methodVsConstructor() {
+        Square square = new Square("square", 4);
+        assertNotNull(square.getName());
     }
 
     private String shapeToString(@NotNull Shape shape) {
 
-        Set<ConstraintViolation<ParamValidationTest>> violations = ParamValidation.checkMethodParams(this, shape);
+        Set<ConstraintViolation<Object>> violations = Validations.checkParameters(this, shape);
         LOG.info("Violations: {}", violations);
-        ParamValidation.validateMethodParams(this, shape);
+        Validations.validateParameters(this, shape);
 
         return shape.getName() + " has " + shape.getSides() + " sides.";
     }
@@ -63,14 +70,23 @@ class ParamValidationTest {
      */
     private static class Square implements Shape {
 
+        private final String name;
+        private final int sides;
+
+        Square(String name, int sides) {
+            Validations.validateConstructorParams(name, sides);
+            this.name = name;
+            this.sides = sides;
+        }
+
         @Override
         public String getName() {
-            return "Square";
+            return name;
         }
 
         @Override
         public int getSides() {
-            return 4;
+            return sides;
         }
     }
 
@@ -82,12 +98,12 @@ class ParamValidationTest {
         private final UUID employeeId;
 
         private Employee(@NotNull @org.hibernate.validator.constraints.UUID UUID employeeId) {
-            ParamValidation.validateConstructorParams(this, employeeId);
+            Validations.validateConstructorParams(employeeId);
             this.employeeId = employeeId;
         }
 
         private Employee(@NotNull @Min(10) String employeeId) {
-            ParamValidation.validateConstructorParams(this, employeeId);
+            Validations.validateConstructorParams(employeeId);
             this.employeeId = UUID.fromString(employeeId);
         }
 
