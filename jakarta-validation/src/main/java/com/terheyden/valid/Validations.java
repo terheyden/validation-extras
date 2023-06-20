@@ -1,24 +1,15 @@
 package com.terheyden.valid;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.hibernate.validator.internal.engine.path.PathImpl;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Path;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import jakarta.validation.executable.ExecutableValidator;
-import jakarta.validation.metadata.ConstraintDescriptor;
-
-import static java.lang.String.format;
 
 /**
  * Jakarta Bean Validation-related utilities.
@@ -46,7 +37,6 @@ public final class Validations {
 
     // Thrown when we try to validate a null object.
     private static final NullOriginViolation NULL_ORIGIN_VIOLATION = new NullOriginViolation();
-    private static final String EMPTY_STR = "";
 
     private Validations() {
         // Private since this class shouldn't be instantiated.
@@ -54,104 +44,49 @@ public final class Validations {
 
     /**
      * Perform Jakarta Bean Validation on the given object, returning any violations.
-     * To throw an exception if any violations are found, use {@link #validate(Object)} instead.
+     * To throw an exception if any violations are found, use {@link #validateObject(Object)} instead.
      *
      * @param objectToValidate the object to validate; null is considered invalid
      * @return a set of constraint violations, or an empty set if no violations were found
      */
     @SuppressWarnings("unchecked")
-    public static <T> Set<ConstraintViolation<T>> check(@Nullable T objectToValidate) {
+    public static <T> Set<ConstraintViolation<T>> checkObject(@Nullable T objectToValidate) {
 
         return objectToValidate == null
             ? Collections.singleton(NULL_ORIGIN_VIOLATION)
             : VALIDATOR.validate(objectToValidate);
     }
 
-    public static <T> Set<ConstraintViolation<T>> checkParameters(T thisObj, Object... methodParams) {
+    public static <T> Set<ConstraintViolation<T>> checkMethodArgs(T thisObj, Object... methodArgs) {
         try {
 
-            return ParamValidation.checkParameters(thisObj, methodParams);
+            return ArgValidation.checkMethodArgs(thisObj, methodArgs);
 
         } catch (Exception e) {
-            return throwUnchecked(e);
+            return ValidUtils.throwUnchecked(e);
         }
     }
 
-    public static Set<ConstraintViolation<Object>> checkConstructorParams(Object... constructorParams) {
+    public static Set<ConstraintViolation<Object>> checkConstructorArgs(Object... constructorArgs) {
         try {
 
-            return ParamValidation.checkConstructorParams(constructorParams);
+            return ArgValidation.checkConstructorArgs(constructorArgs);
 
         } catch (Exception e) {
-            return throwUnchecked(e);
+            return ValidUtils.throwUnchecked(e);
         }
-    }
-
-    public static void validateParameters(Object thisObj, Object... methodParams) {
-
-        Set<ConstraintViolation<Object>> violations = null;
-
-        try {
-            violations = ParamValidation.checkParameters(thisObj, methodParams);
-        } catch (Exception e) {
-            throwUnchecked(e);
-        }
-
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }
-    }
-
-    public static void validateConstructorParams(Object... methodParams) {
-
-        Set<ConstraintViolation<Object>> violations = null;
-
-        try {
-            violations = ParamValidation.checkConstructorParams(methodParams);
-        } catch (Exception e) {
-            throwUnchecked(e);
-        }
-
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }
-    }
-
-    /**
-     * Perform Jakarta Bean Validation on the given object, returning any violations as Human-readable strings.
-     * To throw an exception if any violations are found, use {@link #validate(Object)} instead.
-     *
-     * @param objectToValidate the object to validate; null is considered invalid
-     * @return a list of constraint violation descriptions, or an empty list if no violations were found
-     */
-    public static List<String> checkToList(@Nullable Object objectToValidate) {
-        return check(objectToValidate)
-            .stream()
-            .map(Validations::violationToString)
-            .collect(Collectors.toList());
-    }
-
-    /**
-     * Perform Jakarta Bean Validation on the given object, returning any violations as Human-readable strings.
-     * To throw an exception if any violations are found, use {@link #validate(Object)} instead.
-     *
-     * @param objectToValidate the object to validate; null is considered invalid
-     * @return a description of any violations found, or an empty string if none were found
-     */
-    public static String checkToString(@Nullable Object objectToValidate) {
-        return violationsToString(check(objectToValidate));
     }
 
     /**
      * Perform Jakarta Bean Validation on the given object, throwing an exception if any violations are found.
-     * To get a list of violations (without throwing) instead, use {@link #checkToList(Object)}.
+     * To get a list of violations (without throwing) instead, use {@link #checkObject(Object)} instead.
      *
      * @param objectToValidate the object to validate; null is considered invalid
      * @throws NullPointerException if the object to validate is null
      * @throws ConstraintViolationException if any violations are found
      * @return {@code objectToValidate}, for chaining
      */
-    public static <T> T validate(@Nullable T objectToValidate) {
+    public static <T> T validateObject(@Nullable T objectToValidate) {
 
         if (objectToValidate == null) {
             throw new NullPointerException("Object to validate is null.");
@@ -167,113 +102,37 @@ public final class Validations {
         throw new ConstraintViolationException(violations);
     }
 
-    /**
-     * Create a human-readable error message from a constraint violation.
-     */
-    public static String violationToString(@Nullable ConstraintViolation<?> violation) {
+    public static void validateMethodArgs(Object thisObj, Object... methodArgs) {
 
-        if (violation == null) {
-            return EMPTY_STR;
+        Set<ConstraintViolation<Object>> violations = null;
+
+        try {
+            violations = ArgValidation.checkMethodArgs(thisObj, methodArgs);
+        } catch (Exception e) {
+            ValidUtils.throwUnchecked(e);
         }
 
-        String className = violation.getRootBeanClass().getSimpleName();
-        String propertyPath = violation.getPropertyPath().toString();
-        String message = violation.getMessage();
-
-        // The property path will be an empty string, if the violation is on the class itself.
-        return propertyPath.isEmpty()
-            ? format("%s: %s", className, message)
-            : format("%s.%s: %s", className, propertyPath, message);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
+        }
     }
 
-    /**
-     * Return a single human-readable error string for the given constraint violations.
-     */
-    public static String violationsToString(@Nullable Collection<? extends ConstraintViolation<?>> violations) {
+    public static void validateConstructorArgs(Object... methodArgs) {
 
-        if (violations == null || violations.isEmpty()) {
-            return EMPTY_STR;
+        Set<ConstraintViolation<Object>> violations = null;
+
+        try {
+            violations = ArgValidation.checkConstructorArgs(methodArgs);
+        } catch (Exception e) {
+            ValidUtils.throwUnchecked(e);
         }
 
-        return violations.stream()
-            .map(Validations::violationToString)
-            .collect(Collectors.joining("; "));
-    }
-
-    /**
-     * Throw any exception unchecked.
-     */
-    @SuppressWarnings("unchecked")
-    private static <E extends Throwable, R> R throwUnchecked(Throwable throwable) throws E {
-        throw (E) throwable;
-    }
-
-    /**
-     * If the object to validate is null, return a special "null violation" object.
-     */
-    @SuppressWarnings("rawtypes")
-    public static final class NullOriginViolation implements ConstraintViolation {
-
-        @Override
-        public String getMessage() {
-            return "Object to validate is null.";
-        }
-
-        @Override
-        public String getMessageTemplate() {
-            return getMessage();
-        }
-
-        @Override
-        public Object getRootBean() {
-            return this;
-        }
-
-        @Override
-        public Class getRootBeanClass() {
-            return NullOriginViolation.class;
-        }
-
-        @Override
-        public Object getLeafBean() {
-            return this;
-        }
-
-        @Override
-        @Nullable
-        public Object[] getExecutableParameters() {
-            return null;
-        }
-
-        @Override
-        @Nullable
-        public Object getExecutableReturnValue() {
-            return null;
-        }
-
-        @Override
-        public Path getPropertyPath() {
-            return PathImpl.createPathFromString(EMPTY_STR);
-        }
-
-        @Override
-        @Nullable
-        public Object getInvalidValue() {
-            return null;
-        }
-
-        @Override
-        @Nullable
-        public ConstraintDescriptor<?> getConstraintDescriptor() {
-            return null;
-        }
-
-        @Override
-        public Object unwrap(Class type) {
-            return this;
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException(violations);
         }
     }
 }
+
 /*
 
 DEPENDENCIES

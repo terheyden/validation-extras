@@ -18,33 +18,33 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * ValidationsTest unit tests.
  */
-public class ValidationsTest {
+class ValidationsTest {
 
     @Test
-    public void testGetterChecks() {
+    void testGetterChecks() {
 
         User1 good = new User1("Cora", 10);
 
-        assertTrue(Validations.checkToList(good).isEmpty());
-        Validations.validate(good);
+        assertTrue(Validations.checkObject(good).isEmpty());
+        Validations.validateObject(good);
 
-        // Verify that the var that comes back from check() actually works with parse().
+        // Verify that the var that comes back from checkObject() actually works with parse().
         User1 badUser = new User1("x", -1);
-        Set<ConstraintViolation<User1>> violations = Validations.check(badUser);
+        Set<ConstraintViolation<User1>> violations = Validations.checkObject(badUser);
         assertFalse(violations.isEmpty());
 
         User1 nullUser = new User1(null, -1);
-        violations = Validations.check(nullUser);
+        violations = Validations.checkObject(nullUser);
         assertFalse(violations.isEmpty());
     }
 
     @Test
     void testNullObj() {
 
-        assertThrows(NullPointerException.class, () -> Validations.validate(null));
+        assertThrows(NullPointerException.class, () -> Validations.validateObject(null));
 
-        String violations = Validations.checkToString(null);
-        assertEquals("NullOriginViolation: Object to validate is null.", violations);
+        Set<ConstraintViolation<Object>> violations = Validations.checkObject(null);
+        assertEquals("Object to validate is null.", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -89,14 +89,13 @@ public class ValidationsTest {
         private final String name;
         private final int age;
 
-        private User2(String name, int age) {
+        private User2(
+            @NotNull @Size(min = 2) String name,
+            @Min(3) int age) {
+
+            Validations.validateConstructorArgs(name, age);
             this.name = name;
             this.age = age;
-            validateSelf();
-        }
-
-        private void validateSelf() {
-            Validations.validate(this);
         }
 
         @NotNull

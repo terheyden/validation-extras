@@ -1,16 +1,15 @@
 package com.terheyden.valid;
 
-import java.util.Set;
-import java.util.UUID;
-
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.Set;
+import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -97,7 +96,7 @@ class ParamValidationTest {
 
         private final UUID employeeId;
 
-        private Employee(@NotNull @org.hibernate.validator.constraints.UUID UUID employeeId) {
+        private Employee(@NotNull UUID employeeId) {
             Validations.validateConstructorParams(employeeId);
             this.employeeId = employeeId;
         }

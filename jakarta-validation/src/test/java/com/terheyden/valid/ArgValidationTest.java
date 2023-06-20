@@ -17,11 +17,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * ParamValidationTest unit tests.
+ * ArgValidationTest unit tests.
  */
-class ParamValidationTest {
+class ArgValidationTest {
 
-    private static final Logger LOG = getLogger(ParamValidationTest.class);
+    private static final Logger LOG = getLogger(ArgValidationTest.class);
 
     @Test
     void invalidMethodParams_throw() {
@@ -42,9 +42,9 @@ class ParamValidationTest {
 
     private String shapeToString(@NotNull Shape shape) {
 
-        Set<ConstraintViolation<Object>> violations = Validations.checkParameters(this, shape);
+        Set<ConstraintViolation<Object>> violations = Validations.checkMethodArgs(this, shape);
         LOG.info("Violations: {}", violations);
-        Validations.validateParameters(this, shape);
+        Validations.validateMethodArgs(this, shape);
 
         return shape.getName() + " has " + shape.getSides() + " sides.";
     }
@@ -74,7 +74,7 @@ class ParamValidationTest {
         private final int sides;
 
         Square(String name, int sides) {
-            Validations.validateConstructorParams(name, sides);
+            Validations.validateConstructorArgs(name, sides);
             this.name = name;
             this.sides = sides;
         }
@@ -97,13 +97,13 @@ class ParamValidationTest {
 
         private final UUID employeeId;
 
-        private Employee(@NotNull @org.hibernate.validator.constraints.UUID UUID employeeId) {
-            Validations.validateConstructorParams(employeeId);
+        private Employee(@NotNull UUID employeeId) {
+            Validations.validateConstructorArgs(employeeId);
             this.employeeId = employeeId;
         }
 
         private Employee(@NotNull @Min(10) String employeeId) {
-            Validations.validateConstructorParams(employeeId);
+            Validations.validateConstructorArgs(employeeId);
             this.employeeId = UUID.fromString(employeeId);
         }
 
