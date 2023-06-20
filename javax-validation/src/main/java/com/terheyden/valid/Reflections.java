@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
- * Reflections class.
+ * Java reflection utils.
  */
 final class Reflections {
 
@@ -16,7 +16,6 @@ final class Reflections {
     private Reflections() {
         // Private since this class shouldn't be instantiated.
     }
-
 
     /**
      * Get a particular {@link StackFrame} for inspecting things like the calling class and method.
@@ -27,17 +26,17 @@ final class Reflections {
      * @param offset How many stack frames to skip — you have to kinda tweak this to find the frame you want
      * @return The {@link StackFrame} at the specified offset
      */
-    static StackFrame getCurrentStackFrame(int offset) {
+    static StackFrame getStackFrame(int offset) {
         return StackWalker.getInstance()
             .walk(stackFrame -> stackFrame.skip(offset).findFirst())
             .orElseThrow(() -> new IllegalArgumentException("Invalid stack frame depth: " + offset));
     }
 
     /**
-     * Use {@link #getCurrentStackFrame(int)}, but return the class and method name as a string.
+     * Use {@link #getStackFrame(int)}, but return the class and method name as a string.
      */
-    static String getStackFrameClassAndMethodName(int offset) {
-        StackFrame enclosingStackFrame = getCurrentStackFrame(offset);
+    static String getStackFrameClassAndMethod(int offset) {
+        StackFrame enclosingStackFrame = getStackFrame(offset);
         String classAndMethod = enclosingStackFrame.getClassName() + "." + enclosingStackFrame.getMethodName();
         LOG.debug(classAndMethod);
         return classAndMethod;

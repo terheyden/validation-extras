@@ -8,9 +8,9 @@ public interface SelfValidating {
     /**
      * Validate this object's state. Throws if the state is invalid.
      * Call this during construction after all fields are set, or after any setting change.
-     * Depends on: {@link Validations#validate(Object)}
+     * Depends on: {@link Valid#validateObject(Object)}
      */
     default void validateSelf() {
-        Validations.validate(this);
+        Valid.validateObject(this);
     }
 }
