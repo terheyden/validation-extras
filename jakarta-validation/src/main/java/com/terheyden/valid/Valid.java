@@ -15,7 +15,7 @@ import jakarta.validation.executable.ExecutableValidator;
  * Jakarta Bean Validation-related utilities.
  * Dependency info is at the bottom of this file.
  */
-public final class Validations {
+public final class Valid {
 
     /**
      * The default validator factory.
@@ -38,7 +38,7 @@ public final class Validations {
     // Thrown when we try to validate a null object.
     private static final NullOriginViolation NULL_ORIGIN_VIOLATION = new NullOriginViolation();
 
-    private Validations() {
+    private Valid() {
         // Private since this class shouldn't be instantiated.
     }
 

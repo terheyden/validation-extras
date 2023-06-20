@@ -42,9 +42,9 @@ class ArgValidationTest {
 
     private String shapeToString(@NotNull Shape shape) {
 
-        Set<ConstraintViolation<Object>> violations = Validations.checkMethodArgs(this, shape);
+        Set<ConstraintViolation<Object>> violations = Valid.checkMethodArgs(this, shape);
         LOG.info("Violations: {}", violations);
-        Validations.validateMethodArgs(this, shape);
+        Valid.validateMethodArgs(this, shape);
 
         return shape.getName() + " has " + shape.getSides() + " sides.";
     }
@@ -74,7 +74,7 @@ class ArgValidationTest {
         private final int sides;
 
         Square(String name, int sides) {
-            Validations.validateConstructorArgs(name, sides);
+            Valid.validateConstructorArgs(name, sides);
             this.name = name;
             this.sides = sides;
         }
@@ -98,12 +98,12 @@ class ArgValidationTest {
         private final UUID employeeId;
 
         private Employee(@NotNull UUID employeeId) {
-            Validations.validateConstructorArgs(employeeId);
+            Valid.validateConstructorArgs(employeeId);
             this.employeeId = employeeId;
         }
 
         private Employee(@NotNull @Min(10) String employeeId) {
-            Validations.validateConstructorArgs(employeeId);
+            Valid.validateConstructorArgs(employeeId);
             this.employeeId = UUID.fromString(employeeId);
         }
 

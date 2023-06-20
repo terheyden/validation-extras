@@ -18,7 +18,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Helper class that handles validation of method and constructor parameters.
- * Used by {@link Validations}.
+ * Used by {@link Valid}.
  */
 final class ArgValidation {
 
@@ -41,7 +41,7 @@ final class ArgValidation {
 
         Class<?> thisObjClass = thisObj.getClass();
         Method currentMethod = findMatchingMethod(thisObjClass, currentMethodName, methodArgs);
-        return Validations.EXECUTABLE_VALIDATOR.validateParameters(thisObj, currentMethod, methodArgs);
+        return Valid.EXECUTABLE_VALIDATOR.validateParameters(thisObj, currentMethod, methodArgs);
     }
 
     static Set<ConstraintViolation<Object>> checkConstructorArgs(Object[] argValues) throws Exception {
@@ -58,7 +58,7 @@ final class ArgValidation {
         Object[] constructorArgs) {
 
         Constructor<Object> constructor = findMatchingConstructor(thisObjClass, constructorArgs);
-        return Validations.EXECUTABLE_VALIDATOR.validateConstructorParameters(constructor, constructorArgs);
+        return Valid.EXECUTABLE_VALIDATOR.validateConstructorParameters(constructor, constructorArgs);
     }
 
     private static Method findMatchingMethod(Class<?> methodClass, String methodName, Object[] argValues) {

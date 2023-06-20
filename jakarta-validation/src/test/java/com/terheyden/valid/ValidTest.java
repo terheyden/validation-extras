@@ -16,34 +16,34 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * ValidationsTest unit tests.
+ * ValidTest unit tests.
  */
-class ValidationsTest {
+class ValidTest {
 
     @Test
     void testGetterChecks() {
 
         User1 good = new User1("Cora", 10);
 
-        assertTrue(Validations.checkObject(good).isEmpty());
-        Validations.validateObject(good);
+        assertTrue(Valid.checkObject(good).isEmpty());
+        Valid.validateObject(good);
 
         // Verify that the var that comes back from checkObject() actually works with parse().
         User1 badUser = new User1("x", -1);
-        Set<ConstraintViolation<User1>> violations = Validations.checkObject(badUser);
+        Set<ConstraintViolation<User1>> violations = Valid.checkObject(badUser);
         assertFalse(violations.isEmpty());
 
         User1 nullUser = new User1(null, -1);
-        violations = Validations.checkObject(nullUser);
+        violations = Valid.checkObject(nullUser);
         assertFalse(violations.isEmpty());
     }
 
     @Test
     void testNullObj() {
 
-        assertThrows(NullPointerException.class, () -> Validations.validateObject(null));
+        assertThrows(NullPointerException.class, () -> Valid.validateObject(null));
 
-        Set<ConstraintViolation<Object>> violations = Validations.checkObject(null);
+        Set<ConstraintViolation<Object>> violations = Valid.checkObject(null);
         assertEquals("Object to validate is null.", violations.iterator().next().getMessage());
     }
 
@@ -93,7 +93,7 @@ class ValidationsTest {
             @NotNull @Size(min = 2) String name,
             @Min(3) int age) {
 
-            Validations.validateConstructorArgs(name, age);
+            Valid.validateConstructorArgs(name, age);
             this.name = name;
             this.age = age;
         }
